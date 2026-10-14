@@ -1,0 +1,6 @@
+{
+  "name": "Eterno Retorno — Biblioteca Clássica",
+  "description": "Acervo histórico digital e leitor imersivo da literatura clássica brasileira com sistema de fichário tátil de autores e edições fac-símiles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

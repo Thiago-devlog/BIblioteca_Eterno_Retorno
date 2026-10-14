@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-reading: 'Merriweather', Georgia, serif;
+    --font-cormorant: 'Cormorant Garamond', Georgia, serif;
+    --font-bodoni: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    --font-cinzel: 'Cinzel', Georgia, serif;
+    --font-italiana: 'Italiana', 'Cormorant Garamond', serif;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #F1F3F5;
+    color: #0F172A;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: #000000;
+    color: #FFFFFF;
+  }
+}
+
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-bodoni {
+  font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+.font-italiana {
+  font-family: 'Italiana', 'Cormorant Garamond', serif;
+}
+
+.font-reading {
+  font-family: 'Merriweather', Georgia, serif;
+}
+
+.font-cormorant {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-sans-ui {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* Acrylic Glass Shelf Pocket Shadow & Depth */
+.acrylic-shelf-pocket {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Metallic Chrome Screw Accent */
+.acrylic-screw {
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, #FFFFFF 0%, #CBD5E1 50%, #64748B 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.35);
+  border: 0.5px solid #94A3B8;
+  position: relative;
+}
+
+.acrylic-screw::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 1px;
+  background: #475569;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Book Cover Tactile Sheen & Specular Reflection (substitui animação de movimento por reflexo de luz) */
+.shelf-book-item {
+  position: relative;
+  transition: filter 0.3s ease;
+}
+
+/* Sem movimento de salto - mantendo a física sólida da estante */
+.shelf-book-item:hover {
+  transform: none;
+}
+
+.book-glare-container {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 25;
+}
+
+/* Faixa de reflexo diagonal que passa suavemente pela capa */
+.book-glare-sheen {
+  position: absolute;
+  top: -100%;
+  left: -150%;
+  width: 300%;
+  height: 300%;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.05) 35%,
+    rgba(255, 255, 255, 0.42) 50%,
+    rgba(255, 255, 255, 0.08) 65%,
+    transparent 80%
+  );
+  transform: rotate(25deg);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shelf-book-item:hover .book-glare-sheen {
+  opacity: 1;
+  transform: translate(65%, 45%) rotate(25deg);
+}
+
+/* Custom Scrollbar Invisível ou Mínima */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}

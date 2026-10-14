@@ -1,0 +1,6 @@
+{
+  "summary": "Plano de implementação para a geração e exportação de obras completas em formato PDF editorial diagramado (estilo clássico com folha de rosto, sumário, tipografia de época e notas), além do planejamento arquitetural para suporte à leitura offline (PWA e cache local).",
+  "updatedAt": "2026-10-12T19:50:53.273564433Z",
+  "requestFeedback": true,
+  "userFacing": true
+}
