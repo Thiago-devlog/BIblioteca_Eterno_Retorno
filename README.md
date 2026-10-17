@@ -1,5 +1,5 @@
 <div align="center">
-
+<a href="https://editor-8-bit.vercel.app/" target="_blank">
 # Eterno Retorno
 ### Biblioteca Clássica & Leitor Imersivo da Literatura Universal
 
@@ -77,7 +77,7 @@ Ao clicar em qualquer livro, o leitor tem acesso a citações marcantes, sinopse
 ### 4. Leitor Imersivo em Modo Noturno e Ajustes de Leitura
 Ambiente de leitura sem distrações com tipografia nítida, aviso de tradução ativa, seleção de tamanho de fonte, ambiência sonora e opções de download em EPUB e PDF editorial.
 
-![Leitor Imersivo Real](docs/images/real-reader-view.png)
+![Leitor Imersivo Real]docs/images/real-reader-view.png)
 
 ---
 
