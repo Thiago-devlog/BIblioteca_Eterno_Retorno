@@ -1,5 +1,5 @@
 <div align="center">
-<a href="https://editor-8-bit.vercel.app/" target="_blank">
+<a href="https://b-iblioteca-eterno-retorno.vercel.app/" target="_blank">
 # Eterno Retorno
 ### Biblioteca Clássica & Leitor Imersivo da Literatura Universal
 
