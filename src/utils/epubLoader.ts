@@ -32,7 +32,17 @@ function cleanHtmlToParagraphs(htmlString: string): string[] {
   blocks.forEach((b) => {
     // Ignora avisos legais do Project Gutenberg em rodapés se não forem parte do texto literário
     const raw = b.textContent?.trim() || '';
-    if (raw.length > 0 && !raw.includes('End of the Project Gutenberg') && !raw.includes('*** END OF THE PROJECT GUTENBERG')) {
+    if (
+      raw.length > 0 &&
+      !raw.includes('End of the Project Gutenberg') &&
+      !raw.includes('*** END OF THE PROJECT GUTENBERG') &&
+      !raw.includes('*** START OF THE PROJECT GUTENBERG') &&
+      !raw.includes('Project Gutenberg License') &&
+      !raw.includes('Project Gutenberg eBook') &&
+      !raw.startsWith('Title: ') &&
+      !raw.startsWith('Author: ') &&
+      !raw.startsWith('Release date: ')
+    ) {
       paragraphs.push(raw);
     }
   });
@@ -203,10 +213,10 @@ export async function loadEpubChapters(epubUrl: string): Promise<ChapterData[]> 
             tocMap.set(cleanHref, rawTitle);
           }
         }
-        // Extrai pontos navPoint do NCX
-        const ncxMatches = tocXml.matchAll(/<text>(.*?)<\/text>\s*<\/navLabel>\s*<content\s+src=["']([^"']+)["']/gs);
+        // Extrai pontos navPoint do NCX com regex segura
+        const ncxMatches = tocXml.matchAll(/<navLabel>\s*<text>([\s\S]*?)<\/text>\s*<\/navLabel>\s*<content\s+src=["']([^"']+)["']/g);
         for (const nm of ncxMatches) {
-          const rawTitle = nm[1].trim();
+          const rawTitle = nm[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
           const rawHref = nm[2].split('#')[0];
           if (rawHref && rawTitle && !tocMap.has(rawHref)) {
             tocMap.set(rawHref, rawTitle);
@@ -220,11 +230,16 @@ export async function loadEpubChapters(epubUrl: string): Promise<ChapterData[]> 
     let chapterCounter = 1;
 
     for (const href of spineHrefs) {
-      // Ignora páginas puramente de capa ou avisos de licença externa se não forem o livro
-      if (href.toLowerCase().includes('cover') && !href.toLowerCase().includes('chapter')) {
-        continue;
-      }
-      if (href.toLowerCase().includes('wrap0000')) {
+      const lowerHref = href.toLowerCase();
+      // Ignora páginas puramente de capa, sumário ou avisos de licença externa
+      if (
+        (lowerHref.includes('cover') && !lowerHref.includes('chapter')) ||
+        lowerHref.includes('wrap0000') ||
+        lowerHref.includes('pg-header') ||
+        lowerHref.includes('titlepage') ||
+        lowerHref.includes('toc') ||
+        lowerHref.endsWith('.ncx')
+      ) {
         continue;
       }
 
@@ -233,6 +248,18 @@ export async function loadEpubChapters(epubUrl: string): Promise<ChapterData[]> 
       if (!file) continue;
 
       const htmlContent = await file.async('text');
+
+      // Descarta páginas com cabeçalho ou boilerplate Gutenberg
+      if (
+        htmlContent.includes('pg-boilerplate') ||
+        htmlContent.includes('id="pg-header"') ||
+        htmlContent.includes('The Project Gutenberg eBook') ||
+        htmlContent.includes('class="pgheader"') ||
+        htmlContent.includes('Project Gutenberg License')
+      ) {
+        continue;
+      }
+
       const baseHref = href.split('#')[0];
       const mainTitle = tocMap.get(baseHref) || '';
 
@@ -269,6 +296,14 @@ export async function loadEpubChapters(epubUrl: string): Promise<ChapterData[]> 
         // Documento único por capítulo
         const paragraphs = cleanHtmlToParagraphs(htmlContent);
         if (paragraphs.length === 0) continue;
+        if (paragraphs.length <= 2 && paragraphs.some((p) => p.includes('Gutenberg') || p.includes('eBook') || p.includes('Transcribed from') || p.includes('License'))) {
+          continue;
+        }
+        // Descarta folhas de divisão ou títulos de partes com menos de 160 caracteres
+        const totalChars = paragraphs.reduce((sum, p) => sum + p.length, 0);
+        if (paragraphs.length <= 2 && totalChars < 160) {
+          continue;
+        }
 
         let chapterTitle = mainTitle;
         if (!chapterTitle) {

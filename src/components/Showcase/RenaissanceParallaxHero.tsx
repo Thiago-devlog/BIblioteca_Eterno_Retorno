@@ -353,11 +353,10 @@ export const RenaissanceParallaxHero: React.FC<RenaissanceParallaxHeroProps> = (
           </motion.div>
         </motion.div>
 
-        {/* ============================================================== */}
-        {/* RODAPÉ DO HERO: Totalmente limpo conforme pedido */}
-        {/* (Removidos textos do canto inferior para máxima clareza visual) */}
+        {/* Gradiente sutil de chão (z-25) sobrepondo a base dos personagens para fusão perfeita na biblioteca */}
+        <div className="absolute bottom-0 inset-x-0 h-14 bg-gradient-to-t from-[#0C0806] via-[#0C0806]/70 to-transparent pointer-events-none z-25" />
+
         {/* Espaçador invisível para manter a altura harmoniosa */}
-        {/* ============================================================== */}
         <div className="relative z-30 h-6 pointer-events-none" />
       </div>
     </div>
