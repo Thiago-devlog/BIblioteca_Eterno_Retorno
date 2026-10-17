@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { BookItem } from '../../data/booksData';
-import { Heart, CheckCircle2 } from 'lucide-react';
+import { Heart, CheckCircle2, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
+import { calculateBookReadingTimeMinutes, formatReadingTime } from '../../utils/readingTime';
 
 interface AcrylicBookCardProps {
   book: BookItem;
@@ -19,6 +20,9 @@ export const AcrylicBookCard: React.FC<AcrylicBookCardProps> = ({
   const isCompleted = progressPercent >= 100;
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+
+  const estimatedMinutes = calculateBookReadingTimeMinutes(book);
+  const readingTimeFormatted = formatReadingTime(estimatedMinutes);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -41,7 +45,7 @@ export const AcrylicBookCard: React.FC<AcrylicBookCardProps> = ({
       onMouseMove={handleMouseMove}
       className="shelf-book-item group relative flex-shrink-0 cursor-pointer select-none text-left"
       style={{ width: '112px' }}
-      title={`${book.title} (${book.year}) — Clique para abrir a apresentação editorial`}
+      title={`${book.title} (${book.year}) — Obra Completa · Tempo estimado: ${readingTimeFormatted}`}
     >
       {/* Visual Book Cover — sem animação de salto; agora com reflexo de luz e acabamento físico */}
       <div
@@ -99,11 +103,16 @@ export const AcrylicBookCard: React.FC<AcrylicBookCardProps> = ({
           </p>
         </div>
 
-        {/* Rodapé da Capa */}
-        <div className="text-center z-10 border-t pt-1" style={{ borderColor: `${book.coverAccent}25` }}>
-          <span className="text-[6.5px] font-sans font-bold uppercase tracking-wider block opacity-85 truncate">
-            {isCompleted ? 'CONCLUÍDO' : book.gutenbergId ? `GUTENBERG #${book.gutenbergId}` : 'OBRA INTEGRAL'}
-          </span>
+        {/* Rodapé da Capa: Obra Completa & Tempo Estimado de Leitura */}
+        <div className="text-center z-10 border-t pt-1 space-y-0.5" style={{ borderColor: `${book.coverAccent}25` }}>
+          <div className="flex items-center justify-center gap-1 text-[6.5px] font-mono font-bold uppercase tracking-wider opacity-90 truncate">
+            <span className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
+            <span>{isCompleted ? 'CONCLUÍDO' : 'OBRA COMPLETA'}</span>
+          </div>
+          <div className="flex items-center justify-center gap-0.5 text-[6.5px] font-mono opacity-80">
+            <Clock className="w-2 h-2 shrink-0" />
+            <span>~{readingTimeFormatted}</span>
+          </div>
         </div>
 
         {/* Indicador de Leitura */}

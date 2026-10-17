@@ -29,7 +29,9 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
   onOpenReaderDirectly,
   onOpenDossiers,
 }) => {
-  // Divisão em Categorias com Prateleiras de Acrílico Colorido
+  const ecaBooks = books.filter((b) => b.authorId === 'eca-de-queiros');
+  const tolstoiBooks = books.filter((b) => b.authorId === 'tolstoi');
+  const kafkaBooks = books.filter((b) => b.authorId === 'franz-kafka');
   const dostoievskiBooks = books.filter((b) => b.authorId === 'dostoievski');
   const machadoBooks = books.filter((b) => b.authorId === 'machado-de-assis');
   const romanticismBooks = books.filter(
@@ -80,9 +82,9 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
       {/* Indicador de Status Offline do PWA */}
       <OfflineIndicator />
 
-      {/* CONTAINER PRINCIPAL: EXCLUSIVAMENTE NO MODO ESTENDIDO */}
+      {/* CONTAINER PRINCIPAL: COBRINDO DE CANTO A CANTO COM ELEGÂNCIA */}
       <div
-        className={`w-full max-w-6xl rounded-3xl border overflow-hidden min-h-[850px] pb-28 px-3.5 sm:px-6 md:px-8 relative transition-all duration-300 ${themePageStyles.container}`}
+        className={`w-full max-w-[1380px] rounded-2xl sm:rounded-3xl border overflow-hidden min-h-[850px] pb-28 px-2 sm:px-5 md:px-7 relative transition-all duration-300 ${themePageStyles.container}`}
       >
         {/* 1. HERÓI TRIDIMENSIONAL COM PARALLAX RENASCENTISTA (Estilo Shopify Editions Renaissance) */}
         <RenaissanceParallaxHero
@@ -96,7 +98,40 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
 
         {/* 2. PRATELEIRAS VERTICAIS COM BOLSO DE ACRÍLICO COLORIDO */}
         <div className="space-y-7 px-1 sm:px-2 mt-2" id="prateleiras">
-          {/* Prateleira 1: Fiódor Dostoiévski (Acrílico Carmesim Imperial) */}
+          {/* Prateleira 1: Eça de Queirós (Acrílico Âmbar Real) */}
+          <AcrylicShelf
+            categoryTitle="Eça de Queirós · Realismo & Costumes Lusitanos"
+            books={ecaBooks}
+            shelfColor="amber"
+            readingProgress={readingProgress}
+            favorites={favorites}
+            themeMode={themeMode}
+            onSelectBookToInspect={onOpenBook}
+          />
+
+          {/* Prateleira 2: Lev Tolstói (Acrílico Rubi Imperial) */}
+          <AcrylicShelf
+            categoryTitle="Lev Tolstói · A Grande Epopeia Humana & Realismo Russo"
+            books={tolstoiBooks}
+            shelfColor="ruby"
+            readingProgress={readingProgress}
+            favorites={favorites}
+            themeMode={themeMode}
+            onSelectBookToInspect={onOpenBook}
+          />
+
+          {/* Prateleira 3: Franz Kafka (Acrílico Translúcido Grafite) */}
+          <AcrylicShelf
+            categoryTitle="Franz Kafka · O Labirinto Moderno & Ficção Existencial"
+            books={kafkaBooks}
+            shelfColor="frosted"
+            readingProgress={readingProgress}
+            favorites={favorites}
+            themeMode={themeMode}
+            onSelectBookToInspect={onOpenBook}
+          />
+
+          {/* Prateleira 4: Fiódor Dostoiévski (Acrílico Carmesim Imperial) */}
           <AcrylicShelf
             categoryTitle="Fiódor Dostoiévski · Filosofia & Realismo Psicológico"
             books={dostoievskiBooks}
@@ -107,7 +142,7 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
             onSelectBookToInspect={onOpenBook}
           />
 
-          {/* Prateleira 2: Machado de Assis (Acrílico Âmbar Clássico) */}
+          {/* Prateleira 5: Machado de Assis (Acrílico Âmbar Clássico) */}
           <AcrylicShelf
             categoryTitle="Machado de Assis · O Bruxo do Cosme Velho"
             books={machadoBooks}
@@ -118,7 +153,7 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
             onSelectBookToInspect={onOpenBook}
           />
 
-          {/* Prateleira 3: Romantismo & Poesia Cívica (Acrílico Translúcido) */}
+          {/* Prateleira 6: Romantismo & Poesia Cívica (Acrílico Translúcido) */}
           <AcrylicShelf
             categoryTitle="Romantismo Indianista & Poesia da Liberdade"
             books={romanticismBooks}
@@ -129,7 +164,7 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
             onSelectBookToInspect={onOpenBook}
           />
 
-          {/* Prateleira 4: Naturalismo & Impressionismo (Acrílico Azul Cobalto) */}
+          {/* Prateleira 7: Naturalismo & Impressionismo (Acrílico Azul Cobalto) */}
           <AcrylicShelf
             categoryTitle="Naturalismo & Impressionismo"
             books={naturalismBooks}
@@ -140,7 +175,7 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
             onSelectBookToInspect={onOpenBook}
           />
 
-          {/* Prateleira 5: Pré-Modernismo & Crônica Social (Acrílico Esmeralda) */}
+          {/* Prateleira 8: Pré-Modernismo & Crônica Social (Acrílico Esmeralda) */}
           <AcrylicShelf
             categoryTitle="Pré-Modernismo & Crônica Suburbana"
             books={modernismBooks}

@@ -29,10 +29,23 @@ import {
   Download,
   FileText,
   Loader2,
+  Languages,
+  Globe,
+  Columns,
+  MoreHorizontal,
 } from 'lucide-react';
 import { loadEpubChapters } from '../../utils/epubLoader';
 import { generateAndDownloadBookPdf } from '../../utils/editorialPdfGenerator';
 import { motion, AnimatePresence } from 'motion/react';
+import { QuickTranslateModal } from './TranslatorModal';
+import { ChapterTranslatorDrawer, TranslationReadingMode } from './ChapterTranslatorDrawer';
+import { translateChapterParagraphs, SUPPORTED_LANGUAGES } from '../../services/translatorService';
+import {
+  calculateBookReadingTimeMinutes,
+  calculateChapterReadingTimeMinutes,
+  formatReadingTime,
+  formatChapterReadingTime,
+} from '../../utils/readingTime';
 
 interface MinimalistReaderProps {
   book: BookItem;
@@ -67,10 +80,26 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
   const [fontSize, setFontSize] = useState(18);
   const [showDrawer, setShowDrawer] = useState(false);
   const [showFontMenu, setShowFontMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showNotesDrawer, setShowNotesDrawer] = useState(false);
   const [showGlossary, setShowGlossary] = useState(false);
   const [glossaryInitialTerm, setGlossaryInitialTerm] = useState('');
   const [slideDirection, setSlideDirection] = useState<'next' | 'prev' | 'none'>('none');
+  // Barra inferior oculta por padrão ou com auto-hide para leitura minimalista limpa
+  const [isBottomBarVisible, setIsBottomBarVisible] = useState(false);
+  const lastScrollY = useRef(0);
+  const bottomBarTimer = useRef<NodeJS.Timeout | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  // Revela a barra inferior temporariamente por 4 segundos
+  const revealBottomBarTemporarily = () => {
+    setIsBottomBarVisible(true);
+    if (bottomBarTimer.current) clearTimeout(bottomBarTimer.current);
+    bottomBarTimer.current = setTimeout(() => {
+      setIsBottomBarVisible(false);
+    }, 4000);
+  };
   // Progresso Geral da Obra (Livro Inteiro)
   const [bookProgressPercent, setBookProgressPercent] = useState<number>(initialProgressPercent || 0);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -143,6 +172,77 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
   const [loadedChapters, setLoadedChapters] = useState<ChapterData[]>(book.chapters);
   const [isLoadingEpub, setIsLoadingEpub] = useState<boolean>(false);
   const [isEpubLoaded, setIsEpubLoaded] = useState<boolean>(false);
+
+  // Google Tradutor da Obra
+  const [readingMode, setReadingMode] = useState<TranslationReadingMode>('original');
+  const [targetLanguage, setTargetLanguage] = useState<string>('pt');
+  const [showChapterTranslator, setShowChapterTranslator] = useState<boolean>(false);
+  const [showQuickTranslate, setShowQuickTranslate] = useState<boolean>(false);
+  const [quickTranslateText, setQuickTranslateText] = useState<string>('');
+  const [chapterTranslations, setChapterTranslations] = useState<Record<string, string[]>>({});
+  const [isTranslatingChapter, setIsTranslatingChapter] = useState<boolean>(false);
+  const [translationProgress, setTranslationProgress] = useState<{ completed: number; total: number }>({
+    completed: 0,
+    total: 0,
+  });
+
+  // Chave atual para o capítulo e idioma selecionados
+  const currentChapterKey = `${book.id}_ch${currentChapterIndex}_${targetLanguage}`;
+  const currentChapterTranslation = chapterTranslations[currentChapterKey] || null;
+
+  // Carrega tradução do cache local se disponível
+  useEffect(() => {
+    const cached = localStorage.getItem(`eterno_ch_trans_${currentChapterKey}`);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setChapterTranslations((prev) => ({
+            ...prev,
+            [currentChapterKey]: parsed,
+          }));
+        }
+      } catch {}
+    }
+  }, [currentChapterKey]);
+
+  // Função para traduzir o capítulo ativo usando Google Tradutor
+  const handleTranslateCurrentChapter = async () => {
+    if (isTranslatingChapter) return;
+    const currentChap = loadedChapters[currentChapterIndex] || loadedChapters[0] || book.chapters[0];
+    const paras = currentChap?.content || [];
+    if (!paras || paras.length === 0) return;
+
+    setIsTranslatingChapter(true);
+    setTranslationProgress({ completed: 0, total: paras.length });
+
+    try {
+      const translated = await translateChapterParagraphs(
+        paras,
+        targetLanguage,
+        (completed, total) => {
+          setTranslationProgress({ completed, total });
+        }
+      );
+
+      setChapterTranslations((prev) => ({
+        ...prev,
+        [currentChapterKey]: translated,
+      }));
+
+      try {
+        localStorage.setItem(`eterno_ch_trans_${currentChapterKey}`, JSON.stringify(translated));
+      } catch {}
+
+      if (readingMode === 'original') {
+        setReadingMode('translated');
+      }
+    } catch (err) {
+      console.error('Erro na tradução do capítulo:', err);
+    } finally {
+      setIsTranslatingChapter(false);
+    }
+  };
 
   // Cálculo da porcentagem de leitura do LIVRO INTEIRO
   // (considerando todos os capítulos concluídos + fração percorrida do capítulo atual)
@@ -230,6 +330,20 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
   const currentChapter: ChapterData =
     loadedChapters[currentChapterIndex] || loadedChapters[0] || book.chapters[0];
 
+  // Cálculos do tempo de leitura da obra completa e do capítulo ativo
+  const totalBookMinutes = calculateBookReadingTimeMinutes({
+    pagesCount: book.pagesCount,
+    chapters: loadedChapters,
+  });
+  const totalBookTimeFormatted = formatReadingTime(totalBookMinutes);
+  const chapterReadingMinutes = calculateChapterReadingTimeMinutes(currentChapter?.content || []);
+  const chapterTimeFormatted = formatChapterReadingTime(chapterReadingMinutes);
+  const remainingMinutes = Math.max(
+    1,
+    Math.round(totalBookMinutes * (1 - Math.min(1, (bookProgressPercent || 0) / 100)))
+  );
+  const remainingBookTimeFormatted = formatReadingTime(remainingMinutes);
+
   // Desativar áudio ao sair do leitor
   useEffect(() => {
     return () => {
@@ -240,6 +354,17 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
   const handleScroll = () => {
     if (!containerRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+
+    // Auto-hide da barra inferior ao rolar para baixo; revela brevemente ao rolar para cima
+    const currentScroll = scrollTop;
+    if (currentScroll > lastScrollY.current + 18 && currentScroll > 60) {
+      setIsBottomBarVisible(false);
+      if (bottomBarTimer.current) clearTimeout(bottomBarTimer.current);
+    } else if (currentScroll < lastScrollY.current - 18) {
+      revealBottomBarTemporarily();
+    }
+    lastScrollY.current = currentScroll;
+
     const chapScrollRatio =
       scrollHeight <= clientHeight
         ? 1
@@ -248,6 +373,37 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
     localStorage.setItem(`eterno_last_scroll_${book.id}`, String(Math.round(chapScrollRatio * 100)));
     localStorage.setItem(`eterno_last_chapter_${book.id}`, String(currentChapterIndex));
     updateOverallBookProgress(currentChapterIndex, chapScrollRatio);
+  };
+
+  // Gestos de toque na tela: toque rápido alterna barra; swipe lateral muda de capítulo
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    // Se for toque suave estático, alterna a exibição dos controles/barra
+    if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+      setTimeout(() => {
+        const sel = window.getSelection();
+        if (!sel || !sel.toString().trim()) {
+          setIsBottomBarVisible((prev) => !prev);
+        }
+      }, 50);
+    } else if (Math.abs(deltaX) > 55 && Math.abs(deltaX) > Math.abs(deltaY) * 1.35) {
+      // Gesto de Swipe lateral para navegação instantânea de capítulo!
+      if (deltaX < 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
   };
 
   const handleNext = () => {
@@ -532,9 +688,9 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
       chapterTitle: 'text-black',
       articleText: 'text-slate-900 selection:bg-amber-200 selection:text-slate-900',
       border: 'border-slate-100',
-      floatingPill: 'bg-black text-white shadow-[0_8px_20px_rgba(0,0,0,0.35)]',
-      timeText: 'text-white/80',
-      percentText: 'text-slate-300',
+      floatingPill: 'bg-white/95 text-slate-800 border border-slate-200/90 shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-md',
+      timeText: 'text-slate-500',
+      percentText: 'text-slate-900',
       modalBg: 'bg-white border-slate-200 text-slate-900',
       dropCap: 'text-black',
     },
@@ -547,9 +703,9 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
       chapterTitle: 'text-white',
       articleText: 'text-slate-200 selection:bg-amber-900 selection:text-amber-100',
       border: 'border-slate-800',
-      floatingPill: 'bg-amber-500 text-black font-bold shadow-[0_8px_20px_rgba(245,158,11,0.25)]',
-      timeText: 'text-black/80',
-      percentText: 'text-black/70',
+      floatingPill: 'bg-[#141B2D]/95 text-slate-200 border border-slate-700/80 shadow-[0_8px_28px_rgba(0,0,0,0.6)] backdrop-blur-md',
+      timeText: 'text-slate-400',
+      percentText: 'text-amber-400',
       modalBg: 'bg-[#0F172A] border-slate-700 text-white',
       dropCap: 'text-amber-400',
     },
@@ -562,9 +718,9 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
       chapterTitle: 'text-[#352313]',
       articleText: 'text-[#382617] selection:bg-[#DEC294] selection:text-[#352313]',
       border: 'border-[#E2D5BA]',
-      floatingPill: 'bg-[#5C3210] text-[#FAF3E0] shadow-[0_8px_20px_rgba(92,50,16,0.3)]',
-      timeText: 'text-[#FAF3E0]/80',
-      percentText: 'text-[#FAF3E0]/70',
+      floatingPill: 'bg-[#FAF3E0]/95 text-[#3D2C1D] border border-[#DFCDB0] shadow-[0_8px_24px_rgba(60,35,15,0.15)] backdrop-blur-md',
+      timeText: 'text-[#8C4A19]',
+      percentText: 'text-[#3D2C1D]',
       modalBg: 'bg-[#FAF3E0] border-[#DFCDB0] text-[#3D2C1D]',
       dropCap: 'text-[#352313]',
     },
@@ -583,37 +739,66 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
       <header className={`relative sticky top-0 z-30 px-4 sm:px-6 py-3.5 flex items-center justify-between border-b backdrop-blur-md transition-colors ${readerThemeStyles.header}`}>
         <button
           onClick={onClose}
-          className={`p-2 -ml-2 rounded-full transition-colors flex items-center gap-2 text-xs font-sans font-bold cursor-pointer ${readerThemeStyles.headerBtn}`}
+          className={`p-1.5 sm:p-2 -ml-1 rounded-full transition-colors flex items-center gap-1.5 text-xs font-sans font-bold cursor-pointer ${readerThemeStyles.headerBtn}`}
+          title="Voltar à Estante"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Voltar à Estante</span>
+          <span className="hidden sm:inline">Estante</span>
         </button>
 
-        <div className="flex flex-col items-center text-center">
-          <span className={`font-display text-sm font-bold truncate max-w-[180px] sm:max-w-xs ${readerThemeStyles.title}`}>
+        {/* Centro: Título da Obra e Capítulo Limpos (Sem badges desnecessárias) */}
+        <div className="flex flex-col items-center text-center max-w-[42vw] sm:max-w-xs px-1">
+          <span className={`font-display text-xs sm:text-sm font-bold truncate max-w-full ${readerThemeStyles.title}`}>
             {book.title}
           </span>
-          <div className="flex items-center gap-1.5 justify-center flex-wrap">
-            <span className={`text-[10px] font-sans font-medium ${readerThemeStyles.subtitle}`}>
-              {book.author} · {currentChapter.number}
-            </span>
-            {isEpubLoaded && (
-              <span className="inline-flex items-center gap-0.5 text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded">
-                <FileCheck2 className="w-2.5 h-2.5" />
-                ePub Real ({loadedChapters.length} caps)
-              </span>
-            )}
-            {isLoadingEpub && (
-              <span className="text-[9px] font-mono text-amber-600 dark:text-amber-400 animate-pulse">
-                Carregando ePub...
-              </span>
-            )}
-          </div>
+          <span className={`text-[10px] sm:text-[11px] font-sans truncate max-w-full opacity-70 ${readerThemeStyles.subtitle}`}>
+            {book.author} · {currentChapter.number}
+          </span>
         </div>
 
-        {/* Ferramentas do Leitor */}
-        <div className="flex items-center gap-1">
-          {/* Alternância Rápida de Tema Visual (Claro / Escuro / Amarelado sem Luz Azul) */}
+        {/* Controles de Navegação e Menu à Direita */}
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          {/* Navegador Direto de Capítulos no Cabeçalho (Navegação imediata sem travar) */}
+          <div className="flex items-center rounded-full bg-black/5 dark:bg-white/10 p-0.5 border border-black/5 dark:border-white/10">
+            <button
+              onClick={handlePrev}
+              disabled={currentChapterIndex === 0}
+              className={`p-1 rounded-full transition-all cursor-pointer ${
+                currentChapterIndex === 0
+                  ? 'opacity-25 cursor-not-allowed'
+                  : 'hover:bg-black/10 dark:hover:bg-white/20 active:scale-90 text-slate-800 dark:text-slate-100'
+              }`}
+              title="Capítulo Anterior"
+              aria-label="Capítulo Anterior"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              onClick={() => setShowDrawer(true)}
+              className="flex items-center gap-1 px-2 py-0.5 text-[11px] font-mono font-bold hover:bg-black/10 dark:hover:bg-white/20 rounded-full transition-all cursor-pointer"
+              title="Abrir Sumário de Capítulos"
+            >
+              <List className="w-3 h-3 opacity-70" />
+              <span>{currentChapterIndex + 1}/{loadedChapters.length}</span>
+            </button>
+
+            <button
+              onClick={handleNext}
+              disabled={currentChapterIndex >= loadedChapters.length - 1}
+              className={`p-1 rounded-full transition-all cursor-pointer ${
+                currentChapterIndex >= loadedChapters.length - 1
+                  ? 'opacity-25 cursor-not-allowed'
+                  : 'hover:bg-black/10 dark:hover:bg-white/20 active:scale-90 text-slate-800 dark:text-slate-100'
+              }`}
+              title="Próximo Capítulo"
+              aria-label="Próximo Capítulo"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Alternância Rápida de Tema Visual (Claro / Escuro / Amarelado) */}
           <button
             onClick={() => {
               const next = currentTheme === 'light' ? 'dark' : currentTheme === 'dark' ? 'amber' : 'light';
@@ -626,157 +811,167 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
             {currentTheme === 'dark' && <Moon className="w-4 h-4 text-amber-300" />}
             {currentTheme === 'amber' && <Flame className="w-4 h-4 text-[#A45A2A]" />}
           </button>
-          {/* Ambiência Sonora */}
+
+          {/* Botão de Ferramentas Agrupadas (Evita quebrar no celular) */}
           <div className="relative">
             <button
-              onClick={() => setShowAudioMenu(!showAudioMenu)}
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
               className={`p-2 rounded-full transition-colors cursor-pointer ${
-                isAudioPlaying
-                  ? 'bg-amber-100 text-amber-800'
-                  : 'hover:bg-slate-100 text-slate-600'
+                showMoreMenu ? 'bg-black/10 dark:bg-white/20' : readerThemeStyles.headerBtn
               }`}
-              title="Ambiência Sonora para Leitura"
+              title="Ajustes e Ferramentas de Leitura"
             >
-              {isAudioPlaying ? (
-                <Volume2 className="w-4 h-4" />
-              ) : (
-                <VolumeX className="w-4 h-4" />
-              )}
+              <MoreHorizontal className="w-4 h-4" />
             </button>
 
-            {/* Menu Dropdown de Áudio */}
-            {showAudioMenu && (
-              <div className="absolute top-11 right-0 w-64 bg-white border border-slate-200 rounded-2xl p-4 shadow-xl z-50 space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <span className="text-xs font-sans font-bold text-slate-800 flex items-center gap-1.5">
-                    <Volume2 className="w-3.5 h-3.5 text-amber-600" />
-                    Ambiência Sonora
-                  </span>
-                  <button
-                    onClick={toggleAudio}
-                    className={`text-[10px] font-sans font-bold px-2 py-0.5 rounded-full cursor-pointer ${
-                      isAudioPlaying
-                        ? 'bg-amber-600 text-white'
-                        : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    {isAudioPlaying ? 'Tocando' : 'Mudo'}
-                  </button>
-                </div>
-
-                {/* Opções de Som */}
-                <div className="grid grid-cols-2 gap-1.5">
-                  {[
-                    { id: 'rain', label: '🌧️ Chuva' },
-                    { id: 'fireplace', label: '🔥 Lareira' },
-                    { id: 'library', label: '🏛️ Biblioteca' },
-                    { id: 'pages', label: '📜 Páginas' },
-                  ].map((s) => (
+            {/* Menu Popover Suspenso de Ferramentas */}
+            <AnimatePresence>
+              {showMoreMenu && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, y: -6 }}
+                  className={`absolute right-0 top-11 w-64 rounded-2xl p-3 shadow-2xl z-50 border space-y-1.5 ${readerThemeStyles.modalBg}`}
+                >
+                  <div className="flex items-center justify-between pb-2 mb-1 border-b border-black/10 dark:border-white/10 text-xs font-bold px-1">
+                    <span>Ajustes de Leitura</span>
                     <button
-                      key={s.id}
-                      onClick={() => changeAmbientSound(s.id as AmbientSoundType)}
-                      className={`p-2 rounded-xl text-xs font-sans text-left transition-colors cursor-pointer border ${
-                        ambientSound === s.id
-                          ? 'bg-amber-50 border-amber-300 font-bold text-amber-900'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                      }`}
+                      onClick={() => setShowMoreMenu(false)}
+                      className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
                     >
-                      {s.label}
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                  ))}
-                </div>
-
-                {/* Volume Slider */}
-                <div>
-                  <div className="flex justify-between text-[10px] font-mono text-slate-500 mb-1">
-                    <span>Volume</span>
-                    <span>{Math.round(audioVolume * 100)}%</span>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={audioVolume}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value);
-                      setAudioVolume(v);
-                      ambientAudio.setVolume(v);
+
+                  {/* 1. Ajuste de Tamanho de Fonte */}
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-black/5 dark:bg-white/5">
+                    <span className="text-xs font-sans flex items-center gap-2">
+                      <Type className="w-3.5 h-3.5 opacity-70" />
+                      Fonte: {fontSize}px
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setFontSize((f) => Math.max(14, f - 2))}
+                        className="w-7 h-7 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 flex items-center justify-center font-bold text-xs cursor-pointer"
+                        title="Diminuir fonte"
+                      >
+                        A-
+                      </button>
+                      <button
+                        onClick={() => setFontSize((f) => Math.min(26, f + 2))}
+                        className="w-7 h-7 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 flex items-center justify-center font-bold text-xs cursor-pointer"
+                        title="Aumentar fonte"
+                      >
+                        A+
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 2. Google Tradutor */}
+                  <button
+                    onClick={() => {
+                      setShowMoreMenu(false);
+                      setShowChapterTranslator(true);
                     }}
-                    className="w-full accent-black"
-                  />
-                </div>
-              </div>
-            )}
+                    className="w-full p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between text-xs cursor-pointer text-left transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Languages className="w-3.5 h-3.5 text-amber-600" />
+                      Google Tradutor
+                    </span>
+                    <span className="text-[10px] font-mono opacity-60 uppercase">{targetLanguage}</span>
+                  </button>
+
+                  {/* 3. Ambiência Sonora */}
+                  <button
+                    onClick={() => {
+                      toggleAudio();
+                    }}
+                    className="w-full p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between text-xs cursor-pointer text-left transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      {isAudioPlaying ? (
+                        <Volume2 className="w-3.5 h-3.5 text-amber-600" />
+                      ) : (
+                        <VolumeX className="w-3.5 h-3.5 opacity-60" />
+                      )}
+                      Ambiência Sonora
+                    </span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                      isAudioPlaying ? 'bg-amber-600 text-white' : 'bg-black/5 dark:bg-white/10'
+                    }`}>
+                      {isAudioPlaying ? 'Ativo' : 'Mudo'}
+                    </span>
+                  </button>
+
+                  {/* 4. Glossário do Século XIX */}
+                  <button
+                    onClick={() => {
+                      setShowMoreMenu(false);
+                      setGlossaryInitialTerm('');
+                      setShowGlossary(true);
+                    }}
+                    className="w-full p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 text-xs cursor-pointer text-left transition-colors"
+                  >
+                    <BookA className="w-3.5 h-3.5 opacity-70" />
+                    <span>Dicionário Século XIX</span>
+                  </button>
+
+                  {/* 5. Caderno de Notas */}
+                  <button
+                    onClick={() => {
+                      setShowMoreMenu(false);
+                      setShowNotesDrawer(true);
+                    }}
+                    className="w-full p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between text-xs cursor-pointer text-left transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <BookMarked className="w-3.5 h-3.5 opacity-70" />
+                      Caderno de Notas
+                    </span>
+                    {highlights.length > 0 && (
+                      <span className="text-[10px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 px-1.5 py-0.2 rounded-full">
+                        {highlights.length}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* 6. Baixar PDF Editorial */}
+                  <button
+                    onClick={() => {
+                      setShowMoreMenu(false);
+                      handleDownloadPdf();
+                    }}
+                    disabled={isGeneratingPdf}
+                    className="w-full p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between text-xs cursor-pointer text-left transition-colors disabled:opacity-50"
+                  >
+                    <span className="flex items-center gap-2">
+                      {isGeneratingPdf ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
+                      ) : (
+                        <FileText className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
+                      )}
+                      Baixar PDF Editorial
+                    </span>
+                  </button>
+
+                  {/* 7. Baixar ePub */}
+                  {book.epubUrl && (
+                    <a
+                      href={book.epubUrl}
+                      download={`${book.id}.epub`}
+                      className="w-full p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between text-xs cursor-pointer text-left transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Download className="w-3.5 h-3.5 text-emerald-600" />
+                        Baixar Arquivo ePub
+                      </span>
+                    </a>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-
-          {/* Dicionário Século XIX */}
-          <button
-            onClick={() => {
-              setGlossaryInitialTerm('');
-              setShowGlossary(true);
-            }}
-            className="p-2 rounded-full hover:bg-slate-100 text-slate-600 cursor-pointer"
-            title="Glossário do Século XIX"
-          >
-            <BookA className="w-4 h-4" />
-          </button>
-
-          {/* Caderno de Notas */}
-          <button
-            onClick={() => setShowNotesDrawer(true)}
-            className="relative p-2 rounded-full hover:bg-slate-100 text-slate-600 cursor-pointer"
-            title="Caderno de Notas e Grifos"
-          >
-            <BookMarked className="w-4 h-4" />
-            {highlights.length > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-600" />
-            )}
-          </button>
-
-          {/* Sumário */}
-          <button
-            onClick={() => setShowDrawer(true)}
-            className="p-2 rounded-full hover:bg-slate-100 text-slate-600 cursor-pointer"
-            title="Sumário de Capítulos"
-          >
-            <List className="w-4 h-4" />
-          </button>
-
-          {/* Tipografia */}
-          <button
-            onClick={() => setShowFontMenu(!showFontMenu)}
-            className="p-2 rounded-full hover:bg-slate-100 text-slate-600 cursor-pointer"
-            title="Tamanho da Fonte"
-          >
-            <Type className="w-4 h-4" />
-          </button>
-
-          {/* Baixar PDF Editorial Clássico */}
-          <button
-            onClick={handleDownloadPdf}
-            disabled={isGeneratingPdf}
-            className="p-2 rounded-full hover:bg-slate-100 text-slate-600 cursor-pointer disabled:opacity-50"
-            title={isGeneratingPdf ? 'Diagramando PDF...' : 'Baixar edição diagramada em PDF (com folha de rosto, sumário e miolo clássico)'}
-          >
-            {isGeneratingPdf ? (
-              <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
-            ) : (
-              <FileText className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-            )}
-          </button>
-
-          {/* Baixar ePub (Ação Complementar de Exportação) */}
-          {book.epubUrl && (
-            <a
-              href={book.epubUrl}
-              download={`${book.id}.epub`}
-              className="p-2 rounded-full hover:bg-slate-100 text-slate-600 cursor-pointer"
-              title="Baixar arquivo ePub da obra completa"
-            >
-              <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            </a>
-          )}
         </div>
 
         {/* Barra contínua de progresso do LIVRO INTEIRO */}
@@ -788,11 +983,17 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
         </div>
       </header>
 
-      {/* ÁREA DE LEITURA (COLUNA EDITORIAL ENTRE 620px E 680px) */}
+      {/* ÁREA DE LEITURA (COLUNA EDITORIAL ENTRE 620px E 680px) COM SUPORTE A SWIPE LATERAL */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-6 sm:px-12 py-10 pb-36"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onClick={() => {
+          // Toque suave na tela revela a barra inferior com auto-hide
+          revealBottomBarTemporarily();
+        }}
+        className="flex-1 overflow-y-auto px-5 sm:px-12 py-8 pb-32 cursor-pointer select-text"
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -810,7 +1011,7 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-[640px] mx-auto space-y-6"
           >
-            {/* Título do Capítulo */}
+            {/* Título do Capítulo Puro & Minimalista */}
             <div className={`mb-8 pb-4 border-b ${readerThemeStyles.border}`}>
               <span className={`text-xs font-mono font-bold uppercase tracking-widest block mb-1 opacity-60`}>
                 {currentChapter.number}
@@ -820,13 +1021,82 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
               </h2>
             </div>
 
-            {/* Artigo com parágrafos */}
+            {/* Banner de Tradução Ativa (Google Tradutor) */}
+            {readingMode !== 'original' && (
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs mb-6 select-none">
+                <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200">
+                  <Languages className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>
+                    Exibindo em{' '}
+                    <strong>
+                      {readingMode === 'bilingual' ? 'Modo Bilíngue Interlinear' : 'Texto Integral Traduzido'}
+                    </strong>{' '}
+                    ({SUPPORTED_LANGUAGES.find((l) => l.code === targetLanguage)?.name || 'Português'}) via Google Tradutor
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 self-end sm:self-auto">
+                  {!currentChapterTranslation && !isTranslatingChapter && (
+                    <button
+                      onClick={handleTranslateCurrentChapter}
+                      className="px-3 py-1 rounded-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] cursor-pointer shadow-xs"
+                    >
+                      Traduzir Capítulo Agora
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setReadingMode('original')}
+                    className="text-[11px] font-sans text-amber-700 dark:text-amber-400 font-bold hover:underline cursor-pointer"
+                  >
+                    Voltar ao Original
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Artigo com parágrafos (Suporte a Original, Traduzido e Bilíngue) */}
             <article
               className={`font-reading leading-[1.85] space-y-6 ${readerThemeStyles.articleText}`}
               style={{ fontSize: `${fontSize}px` }}
             >
-              {currentChapter.content.map((paragraph, idx) =>
-                renderParagraphWithHighlights(paragraph, idx)
+              {isTranslatingChapter && !currentChapterTranslation ? (
+                <div className="py-16 text-center space-y-3">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto text-amber-600" />
+                  <p className="text-base font-display font-bold">
+                    Traduzindo capítulo com Google Tradutor...
+                  </p>
+                  <p className="text-xs font-mono opacity-70">
+                    Processando parágrafo {translationProgress.completed} de {translationProgress.total} (
+                    {Math.round((translationProgress.completed / (translationProgress.total || 1)) * 100)}%)
+                  </p>
+                </div>
+              ) : readingMode === 'translated' && currentChapterTranslation ? (
+                currentChapterTranslation.map((paragraph, idx) => (
+                  <p key={`trans-${idx}`} className="relative leading-[1.85]">
+                    {paragraph}
+                  </p>
+                ))
+              ) : readingMode === 'bilingual' && currentChapterTranslation ? (
+                currentChapter.content.map((paragraph, idx) => (
+                  <div key={`bilingual-${idx}`} className="space-y-2 mb-6">
+                    <div className="relative">
+                      {renderParagraphWithHighlights(paragraph, idx)}
+                    </div>
+                    {currentChapterTranslation[idx] && (
+                      <div className="pl-4 py-2 pr-3 my-2 border-l-2 border-amber-600/50 bg-amber-500/8 dark:bg-amber-400/8 rounded-r-xl text-[0.93em] font-serif italic text-amber-950/85 dark:text-amber-100/90 leading-relaxed">
+                        <div className="flex items-center gap-1.5 text-[9.5px] font-mono not-italic uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-1 font-bold select-none">
+                          <Languages className="w-3 h-3" />
+                          <span>Tradução ({targetLanguage.toUpperCase()}):</span>
+                        </div>
+                        {currentChapterTranslation[idx]}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                currentChapter.content.map((paragraph, idx) =>
+                  renderParagraphWithHighlights(paragraph, idx)
+                )
               )}
             </article>
 
@@ -925,6 +1195,21 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
               <BookA className="w-3.5 h-3.5" />
               <span>Dicionário</span>
             </button>
+
+            {/* Traduzir com Google Tradutor */}
+            <button
+              onClick={() => {
+                setQuickTranslateText(selectedText);
+                setShowQuickTranslate(true);
+                setSelectedText('');
+                setSelectionPosition(null);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-amber-500/25 hover:bg-amber-500/35 flex items-center gap-1 font-semibold cursor-pointer text-amber-300"
+              title="Traduzir trecho com Google Tradutor"
+            >
+              <Languages className="w-3.5 h-3.5" />
+              <span>Traduzir</span>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -978,27 +1263,80 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
         )}
       </AnimatePresence>
 
-      {/* FLOATING PILL INFERIOR COM HORÁRIO E PROGRESSO DO LIVRO INTEIRO */}
-      <div className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-none z-40">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowNotesDrawer(true)}
-          className={`pointer-events-auto px-5 py-2.5 rounded-full flex items-center gap-2.5 text-xs font-sans cursor-pointer transition-colors shadow-lg ${readerThemeStyles.floatingPill}`}
-          title="Ver caderno de notas · Progresso do livro inteiro"
-        >
-          <Clock className="w-3.5 h-3.5 opacity-80" />
-          <span className={readerThemeStyles.timeText}>{currentTime}</span>
-          <span className="opacity-40">·</span>
-          <span className="opacity-80 font-mono text-[11px]">
-            Cap. {currentChapterIndex + 1}/{loadedChapters.length}
-          </span>
-          <span className="opacity-40">·</span>
-          <span className={`font-mono font-bold ${readerThemeStyles.percentText}`}>
-            {bookProgressPercent}% do livro
-          </span>
-        </motion.button>
-      </div>
+      {/* FLOATING PILL INFERIOR COM AUTO-HIDE AO ROLAR OU APÓS LEITURA */}
+      <AnimatePresence>
+        {isBottomBarVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="fixed bottom-5 left-0 right-0 flex items-center justify-center pointer-events-none z-40 px-3"
+          >
+            <div
+              className={`pointer-events-auto px-3 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 sm:gap-3 text-xs font-sans transition-all shadow-xl border ${readerThemeStyles.floatingPill}`}
+            >
+              {/* Botão Capítulo Anterior */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrev();
+                }}
+                disabled={currentChapterIndex === 0}
+                className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                title="Capítulo Anterior"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowNotesDrawer(true);
+                }}
+                className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:opacity-90 transition-opacity select-none"
+                title="Ver caderno de notas · Progresso da leitura"
+              >
+                <Clock className="w-3 h-3 opacity-60 shrink-0" />
+                <span className={readerThemeStyles.timeText}>{currentTime}</span>
+                <span className="opacity-40">·</span>
+                <span className="opacity-75 font-mono text-[11px]">
+                  Cap. {currentChapterIndex + 1}/{loadedChapters.length}
+                </span>
+                <span className="opacity-40">·</span>
+                <span className={`font-mono font-bold ${readerThemeStyles.percentText}`}>
+                  {bookProgressPercent}%
+                </span>
+              </div>
+
+              {/* Botão Próximo Capítulo */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNext();
+                }}
+                disabled={currentChapterIndex >= loadedChapters.length - 1}
+                className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                title="Próximo Capítulo"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Botão Ocultar Barra Manualmente */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsBottomBarVisible(false);
+                }}
+                className="p-1 -mr-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 opacity-60 hover:opacity-100 transition-all cursor-pointer text-[10px]"
+                title="Esconder barra de leitura"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Painel de Tipografia e Ajustes de Tema */}
       <AnimatePresence>
@@ -1103,40 +1441,45 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '-100%', opacity: 0.5 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
-              className="relative w-80 max-w-[85vw] bg-white border-r border-slate-200 shadow-2xl z-10 p-6 flex flex-col justify-between h-full"
+              className={`relative w-80 max-w-[85vw] border-r shadow-2xl z-10 p-5 sm:p-6 flex flex-col justify-between h-full ${readerThemeStyles.modalBg}`}
             >
-              <div>
-                <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
-                  <h3 className="font-display text-base font-bold text-black">Capítulos</h3>
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-black/10 dark:border-white/10 shrink-0">
+                  <div>
+                    <h3 className="font-display text-base font-bold">Sumário de Capítulos</h3>
+                    <span className="text-[11px] font-mono opacity-60">
+                      {loadedChapters.length} capítulos disponíveis
+                    </span>
+                  </div>
                   <motion.button
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setShowDrawer(false)}
-                    className="p-1 rounded-full hover:bg-slate-100 text-slate-500 cursor-pointer transition-colors"
+                    className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 opacity-70 hover:opacity-100 cursor-pointer transition-colors"
                     title="Fechar sumário"
                   >
                     <X className="w-4 h-4" />
                   </motion.button>
                 </div>
 
-                <div className="space-y-1 overflow-y-auto max-h-[calc(100vh-160px)]">
+                <div className="space-y-1 overflow-y-auto flex-1 pr-1">
                   {loadedChapters.map((chap, idx) => (
                     <button
                       key={chap.id}
                       onClick={() => handleSelectChapter(idx)}
                       className={`w-full text-left p-3 rounded-xl text-xs transition-colors flex items-center justify-between cursor-pointer ${
                         idx === currentChapterIndex
-                          ? 'bg-black text-white font-bold'
-                          : 'hover:bg-slate-50 text-slate-800'
+                          ? 'bg-amber-600 text-white font-bold shadow-xs'
+                          : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-85 hover:opacity-100'
                       }`}
                     >
-                      <div>
-                        <span className="block font-mono text-[9px] uppercase opacity-70">
+                      <div className="min-w-0 pr-2">
+                        <span className="block font-mono text-[9.5px] uppercase opacity-75">
                           {chap.number}
                         </span>
-                        <span className="text-sm font-sans">{chap.title}</span>
+                        <span className="text-xs sm:text-sm font-sans truncate block">{chap.title}</span>
                       </div>
-                      {idx === currentChapterIndex && <Check className="w-3.5 h-3.5" />}
+                      {idx === currentChapterIndex && <Check className="w-4 h-4 shrink-0" />}
                     </button>
                   ))}
                 </div>
@@ -1168,6 +1511,50 @@ export const MinimalistReader: React.FC<MinimalistReaderProps> = ({
         isOpen={quoteCardModalOpen}
         options={quoteCardOptions}
         onClose={() => setQuoteCardModalOpen(false)}
+      />
+
+      {/* Gaveta do Google Tradutor da Obra */}
+      <ChapterTranslatorDrawer
+        isOpen={showChapterTranslator}
+        chapterTitle={currentChapter.title}
+        chapterNumber={currentChapter.number}
+        paragraphs={currentChapter.content}
+        readingMode={readingMode}
+        targetLanguage={targetLanguage}
+        isTranslating={isTranslatingChapter}
+        translationProgress={translationProgress}
+        themeMode={currentTheme}
+        onClose={() => setShowChapterTranslator(false)}
+        onChangeReadingMode={(mode) => {
+          setReadingMode(mode);
+          if (mode !== 'original' && !currentChapterTranslation && !isTranslatingChapter) {
+            handleTranslateCurrentChapter();
+          }
+        }}
+        onChangeTargetLanguage={(lang) => {
+          setTargetLanguage(lang);
+          const newKey = `${book.id}_ch${currentChapterIndex}_${lang}`;
+          if (!chapterTranslations[newKey]) {
+            setTimeout(() => {
+              handleTranslateCurrentChapter();
+            }, 100);
+          }
+        }}
+        onStartChapterTranslation={handleTranslateCurrentChapter}
+      />
+
+      {/* Modal de Tradução Rápida do Trecho Selecionado */}
+      <QuickTranslateModal
+        isOpen={showQuickTranslate}
+        textToTranslate={quickTranslateText}
+        defaultTargetLang={targetLanguage}
+        themeMode={currentTheme}
+        onClose={() => setShowQuickTranslate(false)}
+        onSaveAsNote={(orig, trans) => {
+          handleCreateHighlight('gold');
+          setAddingNoteForText(orig);
+          setNoteInputValue(`[Tradução Google]: ${trans}`);
+        }}
       />
     </motion.div>
   );

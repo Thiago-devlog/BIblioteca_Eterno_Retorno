@@ -81,10 +81,15 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div className="relative w-8 h-8 rounded-full overflow-hidden border border-[#B8860B]/60 shadow-xs shrink-0">
               <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Machado_de_Assis_real.jpg/240px-Machado_de_Assis_real.jpg"
+                src="/assets/authors/machado-de-assis.webp"
                 alt="Foto de perfil com retrato de Machado de Assis"
-                referrerPolicy="no-referrer"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover grayscale"
+                onError={(e) => {
+                  const t = e.currentTarget;
+                  if (t.src.endsWith('.webp')) t.src = '/assets/authors/machado-de-assis.jpg';
+                }}
               />
             </div>
           </div>

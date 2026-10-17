@@ -10,8 +10,10 @@ import {
   Layers,
   Award,
   History,
+  Clock,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { calculateBookReadingTimeMinutes, formatReadingTime } from '../../utils/readingTime';
 
 export interface AuthorEditorialModalProps {
   author: AuthorProfile | null;
@@ -131,47 +133,50 @@ export const AuthorEditorialModal: React.FC<AuthorEditorialModalProps> = ({
 
         {/* Cabeçalho do Autor: Moldura de Galeria com Levitação Suave + Metadados */}
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
-          {/* Moldura com Efeito de Levitação e Sombra Dinâmica idêntica à do livro */}
+          {/* Moldura com Foto Cobrindo Todo o Canto e Levitação Suave */}
           <div className="flex flex-col items-center shrink-0">
             <motion.div
               animate={{ y: [0, -7, 0] }}
               transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut' }}
-              className="relative p-2.5 rounded-xl bg-gradient-to-br from-[#2D1F16] via-[#1B120B] to-[#0F0A06] border-2 border-[#543D2A] shadow-[0_12px_28px_rgba(0,0,0,0.38),inset_0_2px_4px_rgba(255,255,255,0.18),inset_0_-2px_6px_rgba(0,0,0,0.65)] z-10"
+              className="relative w-36 sm:w-44 aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_16px_36px_rgba(0,0,0,0.42)] border-2 border-[#543D2A] z-10 bg-stone-950"
             >
-              {/* Filete Dourado */}
-              <div className="p-0.5 rounded-lg bg-gradient-to-br from-[#D4AF37]/50 via-[#8C6D37]/35 to-[#59421A]/60 border border-[#D4AF37]/50 shadow-inner">
-                {/* Paspatur Nobre */}
-                <div className="p-2 rounded-md bg-[#F9F6EE] dark:bg-[#1C202E] border border-[#E2D8C0] dark:border-slate-700 shadow-[inset_0_2px_6px_rgba(0,0,0,0.12)] flex flex-col items-center">
-                  {/* Retrato */}
-                  <div className="relative w-28 sm:w-32 aspect-[3/4] rounded-xs overflow-hidden shadow-[inset_0_3px_8px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.15)] border border-stone-400/40 dark:border-stone-700 bg-stone-900">
-                    <img
-                      src={author.avatarUrl}
-                      alt={`Retrato de ${author.name}`}
-                      className="w-full h-full object-cover object-top"
-                      style={{ filter: 'sepia(0.18) contrast(1.08)' }}
-                      onError={(e) => {
-                        if (e.currentTarget.src !== author.portraitUrl) {
-                          e.currentTarget.src = author.portraitUrl;
-                        }
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/20 pointer-events-none" />
-                  </div>
+              {/* Foto histórica cobrindo todo o canto perfeitamente em WebP com Lazy Loading */}
+              <img
+                src={author.avatarUrl}
+                alt={`Retrato de ${author.name}`}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover object-top"
+                style={{ filter: 'sepia(0.14) contrast(1.08)' }}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src.endsWith('.webp')) {
+                    target.src = target.src.replace('.webp', '.jpg');
+                  } else if (target.src !== author.portraitUrl) {
+                    target.src = author.portraitUrl;
+                  }
+                }}
+              />
 
-                  {/* Plaqueta de Museu em Latão Escovado */}
-                  <div className="mt-2 w-full py-1 px-1.5 rounded-xs bg-gradient-to-r from-[#C9A85B] via-[#E6D090] to-[#C9A85B] border border-[#7A5B20] shadow-[0_2px_4px_rgba(0,0,0,0.22),inset_0_1px_1px_rgba(255,255,255,0.6)] flex items-center justify-between text-center select-none">
-                    <div className="w-1 h-1 rounded-full bg-[#593E13] shadow-inner shrink-0" />
-                    <div className="px-1 truncate">
-                      <p className="font-cinzel text-[9px] font-bold text-[#342006] tracking-[0.14em] uppercase truncate leading-tight">
-                        {author.name}
-                      </p>
-                      <p className="text-[7.5px] font-mono font-semibold text-[#5B3E13] tracking-widest uppercase">
-                        {author.lifespan}
-                      </p>
-                    </div>
-                    <div className="w-1 h-1 rounded-full bg-[#593E13] shadow-inner shrink-0" />
-                  </div>
+              {/* Filete dourado chanfrado interno contornando toda a moldura até os cantos */}
+              <div className="absolute inset-0 rounded-[14px] ring-1 ring-inset ring-[#D4AF37]/60 pointer-events-none" />
+
+              {/* Vinheta suave e reflexo de vidro de museu */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/20 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/20 pointer-events-none" />
+
+              {/* Plaqueta de Museu em Latão Escovado no rodapé */}
+              <div className="absolute bottom-2 left-2 right-2 py-1 px-2 rounded-xs bg-gradient-to-r from-[#A8873E]/95 via-[#E6D090]/95 to-[#A8873E]/95 backdrop-blur-xs border border-[#7A5B20] shadow-[0_2px_4px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.7)] flex items-center justify-between text-center select-none">
+                <div className="w-1 h-1 rounded-full bg-[#593E13] shadow-inner shrink-0" />
+                <div className="px-1 truncate w-full text-center">
+                  <p className="font-cinzel text-[9.5px] font-bold text-[#342006] tracking-[0.1em] uppercase truncate leading-tight">
+                    {author.name}
+                  </p>
+                  <p className="text-[8px] font-mono font-semibold text-[#5B3E13] tracking-widest uppercase">
+                    {author.lifespan}
+                  </p>
                 </div>
+                <div className="w-1 h-1 rounded-full bg-[#593E13] shadow-inner shrink-0" />
               </div>
             </motion.div>
 
@@ -242,9 +247,19 @@ export const AuthorEditorialModal: React.FC<AuthorEditorialModalProps> = ({
             <span className="block text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Obras no Acervo
             </span>
-            <span className="font-sans font-bold text-sm text-slate-900 dark:text-white flex items-center justify-center gap-1">
+            <span className="font-sans font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center justify-center gap-1">
               <Layers className="w-3.5 h-3.5 text-amber-600" />
-              {authorBooks.length} {authorBooks.length === 1 ? 'título' : 'títulos'}
+              {authorBooks.length} {authorBooks.length === 1 ? 'Obra Completa' : 'Obras Completas'}
+            </span>
+          </div>
+
+          <div>
+            <span className="block text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              Tempo Total
+            </span>
+            <span className="font-sans font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center justify-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-amber-600" />
+              ~{formatReadingTime(authorBooks.reduce((acc, b) => acc + calculateBookReadingTimeMinutes(b), 0))}
             </span>
           </div>
 
@@ -252,17 +267,8 @@ export const AuthorEditorialModal: React.FC<AuthorEditorialModalProps> = ({
             <span className="block text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Escola Literária
             </span>
-            <span className="font-sans font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate block">
+            <span className="font-sans font-bold text-xs sm:text-sm text-amber-700 dark:text-amber-400 truncate block">
               {author.movement}
-            </span>
-          </div>
-
-          <div>
-            <span className="block text-[10px] font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Período
-            </span>
-            <span className="font-sans font-bold text-xs sm:text-sm text-amber-700 dark:text-amber-400">
-              {author.lifespan.includes('18') ? 'Séc. XIX' : 'Séc. XX'}
             </span>
           </div>
         </div>
@@ -273,14 +279,16 @@ export const AuthorEditorialModal: React.FC<AuthorEditorialModalProps> = ({
             <h3 className="text-xs font-sans font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Obras Disponíveis para Leitura Imediata
             </h3>
-            <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400">
-              Texto Integral Canônico
+            <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Todas em Edição Completa
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {authorBooks.map((book) => {
               const bookProgress = readingProgress[book.id]?.progressPercent || 0;
+              const estTime = formatReadingTime(calculateBookReadingTimeMinutes(book));
               return (
                 <div
                   key={book.id}
@@ -314,13 +322,21 @@ export const AuthorEditorialModal: React.FC<AuthorEditorialModalProps> = ({
                       <p className="text-[11px] font-cormorant italic text-slate-600 dark:text-slate-400 truncate">
                         {book.tagline}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-700/60 px-1.5 py-0.2 rounded">
+                          <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                          Obra Completa
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[8.5px] font-mono text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 px-1.5 py-0.2 rounded">
+                          <Clock className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
+                          ~{estTime}
+                        </span>
                         <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500">
-                          {book.chapters.length} capítulos
+                          {book.chapters.length} caps
                         </span>
                         {bookProgress > 0 && (
                           <span className="text-[9px] font-mono font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/60 px-1 rounded-sm">
-                            {bookProgress}% lido
+                            {bookProgress}%
                           </span>
                         )}
                       </div>

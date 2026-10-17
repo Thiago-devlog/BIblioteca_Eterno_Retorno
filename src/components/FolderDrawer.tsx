@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
 import { AuthorProfile, BookItem } from '../data/catalog';
-import {
-  BookOpen,
-  ChevronRight,
-  Sparkles,
-} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AuthorEditorialModal } from './Modal/AuthorEditorialModal';
 
@@ -86,154 +81,78 @@ export const FolderDrawer: React.FC<FolderDrawerProps> = ({
 
   return (
     <section className="w-full text-left space-y-6" id="galeria-autores">
-      {/* 1. CABEÇALHO CLEAN DA GALERIA DE RETRATOS */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-3.5 border-b border-black/10 dark:border-white/10">
+      {/* 1. CABEÇALHO MINIMALISTA DA GALERIA DE RETRATOS */}
+      <div className="flex items-center justify-between pb-3 border-b border-black/10 dark:border-white/10">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span
-              className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-widest uppercase border ${galleryThemeStyles.headerEyebrow}`}
-            >
-              <Sparkles className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-              Galeria Clássica · Molduras em Miniatura
-            </span>
-          </div>
-
-          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[#1E1711] dark:text-white">
-            Galeria dos Mestres da Literatura
+          <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[#1E1711] dark:text-white">
+            Autores
           </h2>
-
-          <p className="font-cormorant italic text-sm text-[#6E5D4F] dark:text-stone-300 mt-0.5 max-w-2xl">
-            Retratos canônicos em molduras refinadas de museu. Clique em qualquer autor para abrir seu dossiê editorial e explorar suas obras originais.
+          <p className="font-cormorant italic text-xs sm:text-sm text-[#6E5D4F] dark:text-stone-300 mt-0.5">
+            Retratos canônicos em molduras de museu. Clique para abrir o dossiê da obra.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 sm:self-end">
-          <span className="font-mono text-xs font-semibold text-[#5A4532] dark:text-stone-300 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-3 py-1 rounded-full">
-            {authors.length} Mestres Canônicos
-          </span>
-        </div>
+        <span className="font-mono text-[11px] font-semibold text-[#5A4532] dark:text-stone-300 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-3 py-1 rounded-full">
+          {authors.length} Autores
+        </span>
       </div>
 
-      {/* 2. GRADE DE QUADROS MAIS COMPACTOS & ELEGANTES (7 COLUNAS NO DESKTOP) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-3.5 lg:gap-4">
+      {/* 2. GRADE DE QUADROS MINIMALISTAS & ELEGANTES (COBRINDO TODO O CANTO) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-10 gap-3 sm:gap-3.5">
         {authors.map((author) => {
-          const authorBookList = books.filter((b) => b.authorId === author.id);
-          const count = authorBookList.length;
-
-          // Leitura em andamento do autor
-          const readingBook = authorBookList.find(
-            (b) => (readingProgress[b.id]?.progressPercent || 0) > 0
-          );
-          const activePercent = readingBook
-            ? readingProgress[readingBook.id]?.progressPercent || 0
-            : 0;
-
           return (
             <motion.div
               key={author.id}
-              whileHover={{ y: -5, scale: 1.015 }}
+              whileHover={{ y: -5, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', damping: 22, stiffness: 350 }}
               onClick={() => handleCardClick(author)}
-              className={`group relative rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between text-left cursor-pointer select-none border transition-all duration-300 ${galleryThemeStyles.cardBg} ${galleryThemeStyles.cardBorder} ${galleryThemeStyles.cardShadow}`}
+              className={`group relative rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between text-left cursor-pointer select-none border transition-all duration-300 ${galleryThemeStyles.cardBg} ${galleryThemeStyles.cardBorder} ${galleryThemeStyles.cardShadow}`}
             >
-              {/* 2.1. MOLDURA DE GALERIA COMPACTA E SOFISTICADA */}
-              <div className="relative w-full mb-2.5">
-                {/* Camada 1: Moldura de Madeira Nobre Chanfrada */}
-                <div className="relative p-1.5 sm:p-2 rounded-xl bg-gradient-to-br from-[#2D1F16] via-[#1B120B] to-[#0F0A06] border-2 border-[#543D2A] shadow-[0_8px_20px_rgba(0,0,0,0.3),inset_0_1.5px_3px_rgba(255,255,255,0.18),inset_0_-2px_4px_rgba(0,0,0,0.65)] transition-transform duration-500 group-hover:shadow-[0_12px_26px_rgba(0,0,0,0.38)]">
-                  {/* Camada 2: Filete Dourado Chanfrado Interno */}
-                  <div className="p-0.5 rounded-lg bg-gradient-to-br from-[#D4AF37]/50 via-[#8C6D37]/35 to-[#59421A]/60 border border-[#D4AF37]/50 shadow-inner">
-                    {/* Camada 3: Paspatur de Algodão Nobre */}
-                    <div
-                      className={`p-1.5 sm:p-2 rounded-md ${galleryThemeStyles.mattingBg} border ${galleryThemeStyles.mattingBorder} shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] flex flex-col items-center`}
-                    >
-                      {/* Camada 4: Retrato Histórico com Recesso */}
-                      <div className="relative aspect-[4/5] w-full rounded-xs overflow-hidden shadow-[inset_0_2px_6px_rgba(0,0,0,0.4),0_1.5px_4px_rgba(0,0,0,0.12)] border border-stone-400/40 dark:border-stone-700 bg-stone-900">
-                        <img
-                          src={author.avatarUrl}
-                          alt={`Retrato histórico de ${author.name}`}
-                          className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
-                          style={{ filter: 'sepia(0.18) contrast(1.08)' }}
-                          onError={(e) => {
-                            if (e.currentTarget.src !== author.portraitUrl) {
-                              e.currentTarget.src = author.portraitUrl;
-                            }
-                          }}
-                        />
+              {/* 2.1. MOLDURA DE GALERIA: A FOTO COBRE TODO O CANTO (FULL BLEED COM LAZY LOADING) */}
+              <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden mb-1.5 shadow-[0_6px_18px_rgba(0,0,0,0.25)] border-2 border-[#4A3525] group-hover:border-[#C9A85B] transition-all duration-300 bg-stone-900">
+                {/* A imagem do autor cobre todo o canto perfeitamente no formato WebP otimizado com Lazy Loading */}
+                <img
+                  src={author.avatarUrl}
+                  alt={`Retrato histórico de ${author.name}`}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-108"
+                  style={{ filter: 'sepia(0.12) contrast(1.06)' }}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src.endsWith('.webp')) {
+                      target.src = target.src.replace('.webp', '.jpg');
+                    } else if (target.src !== author.portraitUrl) {
+                      target.src = author.portraitUrl;
+                    }
+                  }}
+                />
 
-                        {/* Reflexo de Vidro de Museu no Hover */}
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                      </div>
+                {/* Filete dourado chanfrado interno contornando toda a moldura até os cantos */}
+                <div className="absolute inset-0 rounded-[10px] ring-1 ring-inset ring-[#D4AF37]/50 pointer-events-none" />
 
-                      {/* Camada 5: Plaqueta de Museu em Latão Escovado com Parafusos */}
-                      <div className="mt-1.5 w-full py-0.5 px-1 rounded-xs bg-gradient-to-r from-[#C9A85B] via-[#E6D090] to-[#C9A85B] border border-[#7A5B20] shadow-[0_1.5px_3px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.6)] flex items-center justify-between text-center select-none">
-                        <div className="w-0.5 h-0.5 rounded-full bg-[#593E13] shadow-inner shrink-0" />
-                        <div className="px-0.5 truncate w-full text-center">
-                          <p className="font-cinzel text-[8px] sm:text-[8.5px] font-bold text-[#342006] tracking-[0.1em] uppercase truncate leading-tight">
-                            {author.name}
-                          </p>
-                        </div>
-                        <div className="w-0.5 h-0.5 rounded-full bg-[#593E13] shadow-inner shrink-0" />
-                      </div>
-                    </div>
-                  </div>
+                {/* Vinheta suave e reflexo de vidro de museu no hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/15 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                {/* Plaqueta de Museu em Latão Escovado no rodapé */}
+                <div className="absolute bottom-1.5 left-1.5 right-1.5 py-0.5 px-1.5 rounded-xs bg-gradient-to-r from-[#A8873E]/95 via-[#E6D090]/95 to-[#A8873E]/95 backdrop-blur-xs border border-[#7A5B20] shadow-[0_2px_4px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.7)] flex items-center justify-between text-center select-none">
+                  <div className="w-0.5 h-0.5 rounded-full bg-[#593E13] shadow-inner shrink-0" />
+                  <p className="font-cinzel text-[8px] sm:text-[8.5px] font-bold text-[#342006] tracking-[0.08em] uppercase truncate leading-tight w-full text-center">
+                    {author.shortName || author.name}
+                  </p>
+                  <div className="w-0.5 h-0.5 rounded-full bg-[#593E13] shadow-inner shrink-0" />
                 </div>
               </div>
 
-              {/* 2.2. DADOS DO AUTOR: ULTRA CLEAN & COMPACTO */}
-              <div className="space-y-1 mt-0.5 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-[9px] font-mono font-bold tracking-wider text-amber-700 dark:text-amber-400 uppercase truncate">
-                      {author.movement}
-                    </span>
-                    <span className="text-[8.5px] font-mono text-[#8C7662] dark:text-stone-400 shrink-0">
-                      {count} {count === 1 ? 'obra' : 'obras'}
-                    </span>
-                  </div>
-
-                  <h3
-                    className={`font-display text-xs sm:text-sm font-bold tracking-tight leading-snug group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors truncate mt-0.5 ${galleryThemeStyles.authorTitle}`}
-                  >
-                    {author.name}
-                  </h3>
-                </div>
-
-                {/* Citação em 1 linha sutil */}
-                <p
-                  className={`font-cormorant italic text-[11px] leading-snug line-clamp-1 ${galleryThemeStyles.quoteColor}`}
+              {/* 2.2. DADOS DO AUTOR: ULTRA MINIMALISTA — APENAS O TÍTULO */}
+              <div className="pt-1 pb-0.5 text-center">
+                <h3
+                  className={`font-display text-xs sm:text-[13px] font-bold tracking-tight leading-snug group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors truncate ${galleryThemeStyles.authorTitle}`}
                 >
-                  “{author.quote}”
-                </p>
-
-                {/* 2.3. BOTÃO DE AÇÃO MINIMALISTA */}
-                <div className="pt-2 mt-1 border-t border-black/5 dark:border-white/10">
-                  {activePercent > 0 && readingBook ? (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenBook(readingBook);
-                      }}
-                      className="w-full py-1.5 px-2 rounded-full bg-amber-600 hover:bg-amber-700 text-white font-sans font-bold text-[10px] shadow-xs transition-all cursor-pointer flex items-center justify-between"
-                    >
-                      <span className="truncate">Lendo: {readingBook.title}</span>
-                      <span className="font-mono text-[9px] bg-white/20 px-1 rounded-full shrink-0">
-                        {activePercent}%
-                      </span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(author);
-                      }}
-                      className={`w-full py-1 px-2 rounded-full ${galleryThemeStyles.btnSecondary} font-sans font-bold text-[10px] transition-all hover:scale-[1.01] active:scale-98 cursor-pointer flex items-center justify-between border border-black/5 dark:border-white/10`}
-                    >
-                      <span className="truncate">Abrir Dossiê</span>
-                      <ChevronRight className="w-3 h-3 shrink-0 transition-transform group-hover:translate-x-0.5 text-amber-700 dark:text-amber-400" />
-                    </button>
-                  )}
-                </div>
+                  {author.name}
+                </h3>
               </div>
             </motion.div>
           );

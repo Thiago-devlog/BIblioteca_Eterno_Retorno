@@ -162,10 +162,15 @@ export const RealisticBookshelf: React.FC<RealisticBookshelfProps> = ({
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-3 h-3 border-2 border-[#D4AF37] rotate-45" />
               <div className="relative w-full h-full rounded-xs overflow-hidden bg-[#0F172A] border border-[#8C5E35]">
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Machado_de_Assis_real.jpg/240px-Machado_de_Assis_real.jpg"
+                  src="/assets/authors/machado-de-assis.webp"
                   alt="Retrato histórico clássico de Machado de Assis"
-                  referrerPolicy="no-referrer"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover grayscale contrast-125"
+                  onError={(e) => {
+                    const t = e.currentTarget;
+                    if (t.src.endsWith('.webp')) t.src = '/assets/authors/machado-de-assis.jpg';
+                  }}
                 />
               </div>
               <span className="block text-[7px] font-mono uppercase tracking-widest text-center text-[#E5C198] font-bold mt-0.5">

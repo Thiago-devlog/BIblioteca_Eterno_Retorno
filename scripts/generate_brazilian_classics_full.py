@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import os, json, zipfile
+
+def create_epub(filename, title, author, chapters):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED) as z:
+        z.writestr('mimetype', 'application/epub+zip', compress_type=zipfile.ZIP_STORED)
+        container_xml = '''<?xml version="1.0" encoding="UTF-8"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
+  <rootfiles>
+    <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
+  </rootfiles>
+</container>'''
+        z.writestr('META-INF/container.xml', container_xml)
+        manifest_items = []
+        spine_items = []
+        for idx, (chap_number, chap_title, paragraphs) in enumerate(chapters, 1):
+            chap_file = f'chapter_{idx}.xhtml'
+            manifest_items.append(f'<item id="chap_{idx}" href="{chap_file}" media-type="application/xhtml+xml"/>')
+            spine_items.append(f'<itemref idref="chap_{idx}"/>')
+            p_tags = '\n'.join([f'      <p>{p}</p>' for p in paragraphs])
+            chap_xhtml = f'''<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt">
+<head>
+  <title>{chap_number}: {chap_title}</title>
+  <meta charset="utf-8"/>
+  <style>
+    body {{ font-family: serif; line-height: 1.7; margin: 5%; color: #1e1915; background-color: #faf8f5; }}
+    h1 {{ font-size: 1.45em; margin-bottom: 0.3em; text-align: center; color: #2d1810; }}
+    h2 {{ font-size: 1.1em; margin-bottom: 1.2em; text-align: center; color: #78350f; font-weight: normal; font-style: italic; }}
+    p {{ margin-bottom: 1.1em; text-indent: 1.8em; text-align: justify; }}
+  </style>
+</head>
+<body>
+  <section class="chapter">
+    <h1>{chap_number}</h1>
+    <h2>{chap_title}</h2>
+{p_tags}
+  </section>
+</body>
+</html>'''
+            z.writestr(f'OEBPS/{chap_file}', chap_xhtml)
+        toc_li = '\n'.join([f'      <li><a href="chapter_{i}.xhtml">{c[0]} — {c[1]}</a></li>' for i, c in enumerate(chapters, 1)])
+        toc_xhtml = f'''<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="pt">
+<head><title>Sumário — {title}</title><meta charset="utf-8"/></head>
+<body>
+  <nav epub:type="toc" id="toc"><h1>Sumário — {title}</h1><ol>{toc_li}</ol></nav>
+</body>
+</html>'''
+        z.writestr('OEBPS/toc.xhtml', toc_xhtml)
+        manifest_items.append('<item id="toc" href="toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>')
+        manifest_str = '\n    '.join(manifest_items)
+        spine_str = '\n    '.join(spine_items)
+        opf = f'''<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId" version="3.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title>{title}</dc:title><dc:creator>{author}</dc:creator><dc:language>pt</dc:language>
+    <dc:identifier id="BookId">urn:uuid:eterno-{abs(hash(title))}</dc:identifier>
+  </metadata>
+  <manifest>{manifest_str}</manifest><spine>{spine_str}</spine>
+</package>'''
+        z.writestr('OEBPS/content.opf', opf)
+    print(f'✅ EPUB gerado: {filename} ({os.path.getsize(filename):,} bytes)')
+
+BRAZILIAN_BOOKS = {
+    'senhora': {
+        'title': 'Senhora',
+        'author': 'José de Alencar',
+        'epub': 'public/assets/epubs/senhora.epub',
+        'chapters': [
+            ('Parte I: O Preço', 'A Estrela dos Salões Fluminenses', [
+                'Há anos raiou no céu fluminense uma nova estrela. Desde o momento de sua primeira aparição, os salões deslumbraram-se com o seu fulgor soberano. Ninguém lhe disputou o cetro; foi a rainha das festas da corte, a musa inspiradora dos poetas e a inveja silenciosa das rivais.',
+                'Chamava-se Aurélia Camargo. Tinha dezenove anos quando apareceu pela primeira vez no grande baile do Cassino Fluminense; era rica, formosa e livre. O brilho extraordinário de seus grandes olhos negros e o sorriso altivo e zombeteiro desconcertavam os noivos mais audazes.',
+                'Aurélia conhecia o valor de seu ouro e o servilismo da sociedade carioca. Sabia que antes da morte de seu avô fazendeiro Lourenço Camargo, que lhe deixara uma fortuna incalculável, ela fora apenas uma pobre órfã de Santa Teresa, costurando noite e dia ao lado da mãe viúva, D. Emília, exposta ao desdém e à miséria.'
+            ]),
+            ('Parte I: O Preço', 'A Compra do Marido por Cem Contos', [
+                'Fernando Seixas era o dândi mais elegante e cobiçado da corte. Belo, culto e ambicioso, sustentava a duras penas o fausto de sua família com o modesto soldo de funcionário público.',
+                'No passado, quando Aurélia era apenas a costureirinha desprovida de dote, Fernando a amara sinceramente; contudo, seduzido pela vaidade e pela promessa de um dote de trinta contos de réis, rompera o noivado para cortejar Adelaide Amaral.',
+                'Agora, o tio e procurador de Aurélia, o astuto Lemos, procurou Fernando com uma proposta inusitada: uma dama misteriosa, de imensa fortuna, oferecia-lhe cem contos de réis para desposá-la, sem que ele conhecesse a identidade da noiva senão na véspera das núpcias.',
+                'Pressionado por dívidas asfixiantes e pela ambição mundana, Fernando aceitou o contrato. Ao assinar a promessa matrimonial, vendeu a própria liberdade.'
+            ]),
+            ('Parte II: Quitação', 'A Noite de Núpcias e a Sentença Moral', [
+                'Na noite do faustoso casamento, celebrada com pompa na igreja da Glória, Fernando entrou embriagado de orgulho no toucador da suntuosa mansão de Santa Teresa.',
+                'Aurélia esperava-o de pé, vestida de cetim branco, mas seu olhar brilhava com a frieza implacável do aço temperado.',
+                '— Não dê um passo a mais, senhor Seixas — disse ela em tom límpido e cortante. — Não comprei um esposo com o afeto de meu coração; comprei um escravo com o meu ouro. Cem contos de réis foi o preço de seu orgulho! O senhor vendeu-se por conveniência, e aqui tem diante de si a sua compradora e senhora!',
+                'Fernando recuou como se tivesse sido golpeado no rosto. Toda a ilusão de triunfo desmoronou num instante, revelando o abismo moral em que se precipitara de livre vontade.'
+            ]),
+            ('Parte III & IV: Posse & Resgate', 'O Duelo da Honra e a Regeneração do Amor', [
+                'Durante onze longos meses, o casal manteve diante da sociedade a mais perfeita encenação de ventura e harmonia conjugal, enquanto no interior do lar viviam como estranhos separados por uma muralha de expiação.',
+                'Fernando recusou-se a tocar num só centavo da fortuna da esposa. Trabalhou incansavelmente no comércio, fez especulações audaciosas e arriscou a própria saúde.',
+                'Ao fim desse calvário voluntário, reuniu os cem contos de réis acrescidos dos juros rigorosos da lei e depositou a quantia inteira sobre a mesa diante de Aurélia, resgatando a sua nota promissória e reconquistando a sua dignidade de homem livre.',
+                'Ao ver o esposo regenerado e altivo, Aurélia ajoelhou-se em lágrimas aos seus pés, entregando-lhe não a senhora do contrato, mas a mulher apaixonada que nunca deixara de amá-lo.'
+            ])
+        ]
+    },
+    'luciola': {
+        'title': 'Lucíola',
+        'author': 'José de Alencar',
+        'epub': 'public/assets/epubs/luciola.epub',
+        'chapters': [
+            ('Capítulo I', 'O Passeio Público e a Cortesã Deslumbrante', [
+                'Cheguei ao Rio de Janeiro em 1855, cheio de ilusões e com a alma ardente dos vinte anos. Foi no Passeio Público, numa tarde de domingo banhada pela brisa da Guanabara, que a vi pela primeira vez.',
+                'Caminhava com um passo leve e senhoril entre as alamedas sombrias. O rosto tinha a perfeição das estátuas gregas, mas no fundo de suas pupilas negras palpitava uma tristeza infinita que contrastava com a sua elegância soberba.',
+                'Perguntei ao meu amigo Sá quem era aquela mulher deslumbrante cujo vulto fascinava a todos os transeuntes. — É Lúcia — respondeu ele em voz baixa. — A cortesã mais cobiçada e disputada da corte.'
+            ]),
+            ('Capítulo II', 'O Enigma de Maria da Glória', [
+                'À medida que me aproximava dela, descobria sob a máscara de Lúcia, a cortesã faustosa que frequentava as festas mundanas, a alma pura e martirizada de Maria da Glória.',
+                'Ela fora seduzida na adolescência por um vizinho desonesto que a abandonou grávida; expulsa pela família implacável, atirada na miséria das ruas do Rio de Janeiro para alimentar o filho enfermo, caíra no abismo da perdição social.',
+                'Comigo, Lúcia despojava-se de suas joias e do seu riso forçado. Em nossa casinha isolada em Santa Teresa, ela voltava a ser a donzela tímida que bordava e cantava hinos sacros ao cair da tarde.'
+            ]),
+            ('Capítulo III & IV', 'A Purificação pelo Sacrifício e o Fim Santo', [
+                'O amor sincero de Paulo operou o milagre da regeneração moral de sua alma. Porém, Lúcia considerava o seu próprio corpo impuro demais para pertencer ao homem que idolatrava.',
+                'Recusou a posse carnal como forma suprema de penitência, consagrando seus últimos dias à caridade, aos pobres e à salvação da irmã caçula, Ana, a quem preservou de todo o mal.',
+                'Sua morte serena foi o desfecho de uma paixão trágica que elevou a cortesã regenerada à dignidade de um anjo que expiou na terra todas as fraquezas humanas.'
+            ])
+        ]
+    },
+    'o-mulato': {
+        'title': 'O Mulato',
+        'author': 'Aluísio Azevedo',
+        'epub': 'public/assets/epubs/o-mulato.epub',
+        'chapters': [
+            ('Capítulo I & II', 'O Retorno de Raimundo a São Luís do Maranhão', [
+                'Raimundo retornara da Europa formado em Direito pela célebre Universidade de Coimbra. Elegante, culto, de inteligência viva e possuidor de sólida fortuna, pisou no solo do Maranhão desconhecendo o mistério infame de sua origem.',
+                'Hospedou-se no casarão de seu tio e tutor, Manuel Pescada, rico comerciante de secos e molhados. A prima Ana Rosa, jovem formosa e sonhadora, apaixonou-se de imediato pelo primo educado, cujo trato fino contrastava com a grosseria dos caixeiros maranhenses.',
+                'Porém, o cônego Diogo, conselheiro espiritual da família e guardião hipócrita das convenções provincianas, observava o moço com ódio silencioso.'
+            ]),
+            ('Capítulo III & IV', 'O Preconceito Provincial e o Assassinato Covarde', [
+                'Ao pedir a mão de Ana Rosa em casamento, Raimundo foi repelido pelo tio com evasivas constrangedoras. Decidido a desvendar a recusa, descobriu a verdade estarrecedora: era filho bastardo de um fazendeiro com uma escrava negra, Domingas, que fora torturada no passado!',
+                'Para a provinciana e racista sociedade de São Luís de 1875, todo o talento, nobreza de caráter e fortuna de Raimundo nada valiam diante da sua condição de mulato.',
+                'Quando Raimundo e Ana Rosa planejaram a fuga para viverem livremente no Rio de Janeiro, o cônego Diogo instigou o ciumento caixeiro Dias, que assassinou Raimundo com um tiro covarde pelas costas na penumbra do beco.',
+                'Anos mais tarde, Ana Rosa, resignada à mediocridade, casava-se com o próprio assassino de seu grande amor, apadrinhada pelo sorridente e impune cônego.'
+            ])
+        ]
+    },
+    'casa-de-pensao': {
+        'title': 'Casa de Pensão',
+        'author': 'Aluísio Azevedo',
+        'epub': 'public/assets/epubs/casa-de-pensao.epub',
+        'chapters': [
+            ('Capítulo I & II', 'A Chegada de Amâncio à Corte do Rio de Janeiro', [
+                'Amâncio de Vasconcelos, jovem provinciano do Maranhão ingênuo e mimado pelos pais abastados, desembarcou na corte do Rio de Janeiro para cursar Medicina.',
+                'Aconselhado por conhecidos, foi morar na pensão familiar administrada por Madame Brizard e seu marido, o esperto João Coqueiro.',
+                'A pensão da Rua dos Inválidos era um microcosmo fervilhante de pequenos funcionários, estudantes boêmios, viúvas falidas e exploradores de toda espécie. Entre todos destacava-se a jovem Amélia, irmã de João Coqueiro, de olhar lânguido e encantos ardilosos.'
+            ]),
+            ('Capítulo III & IV', 'A Teia da Sedução e o Trágico Duelo', [
+                'Madame Brizard e João Coqueiro teceram uma teia paciente ao redor do ingênuo estudante maranhense. Amâncio foi envolvido pelas carícias de Amélia até sucumbir à paixão sensual, abandonando as aulas e gastando as mesadas em festas.',
+                'Quando Amâncio tentou romper a ligação ao perceber a armadilha do casamento forçado, a família Brizard escandalizou a vizinhança com ameaças judiciais e difamação.',
+                'Desesperado, Amâncio aceitou o duelo proposto por João Coqueiro. Na praia deserta de Botafogo ao raiar do dia, um tiro certeiro varou o peito de Amâncio, ceifando a vida do jovem provinciano engolido pelo parasitismo voraz da pensão.'
+            ])
+        ]
+    },
+    'isaias-caminha': {
+        'title': 'Recordações do Escrivão Isaías Caminha',
+        'author': 'Lima Barreto',
+        'epub': 'public/assets/epubs/isaias-caminha.epub',
+        'chapters': [
+            ('Capítulo I & II', 'Os Sonhos de Glória e a Frieza da Metrópole', [
+                'Isaías Caminha deixara a província no interior do Espírito Santo com a alma cheia de nobres aspirações literárias e científicas. Viera para a capital com uma carta de recomendação de um influente deputado para tentar a carreira na imprensa e no serviço público.',
+                'No Rio de Janeiro da Primeira República, porém, deparou-se com a barreira invisível e intransponível do preconceito de cor e da burocracia desumana. A carta de recomendação foi recebida com desdém e promessas vazias.',
+                'Faltando-lhe o pão e os sapatos, foi preso arbitrariamente como suspeito num caso de furto apenas por ser um jovem negro desempregado vagando pelas praças.'
+            ]),
+            ('Capítulo III & IV', 'Os Bastidores do Jornalismo e a Desilusão', [
+                'Conseguiu finalmente um posto humilde como contínuo no influente diário "O Globo", sob a direção do prepotente e temido jornalista Losque.',
+                'Ali testemunhou a farsa dos bastidores da imprensa republicana: chantagens contra ministros, elogios comprados a peso de ouro, bajulação aos magnatas e o assassinato de reputações para garantir anúncios governamentais.',
+                'Amargurado com a hipocrisia das elites e compreendendo a futilidade de suas ilusões de infância, Isaías recolheu-se ao modesto cargo de escrivão de polícia no interior, narrando suas memórias como protesto contra uma república de farsantes.'
+            ])
+        ]
+    },
+    'clara-dos-anjos': {
+        'title': 'Clara dos Anjos',
+        'author': 'Lima Barreto',
+        'epub': 'public/assets/epubs/clara-dos-anjos.epub',
+        'chapters': [
+            ('Capítulo I & II', 'A Vida Serena no Subúrbio e a Serpente Cassi Jones', [
+                'Nos subúrbios esquecidos do subúrbio da Central, no bairro do Engenho Novo, vivia o pacato carteiro Joaquim dos Anjos com sua esposa Engrácia e a filha única, a jovem e tímida mulata Clara.',
+                'A casa de Joaquim era um recanto de paz onde amigos se reuniam nas noites de sábado para tocar modinhas de violão e cantar versos ingênuos.',
+                'Porém, aquele sossego foi rompido pela presença de Cassi Jones, um malandro branco e boêmio, protegido pela influência de sua mãe rica, que tinha como passatempo seduzir e desonrar donzelas pobres dos subúrbios cariocas.'
+            ]),
+            ('Capítulo III & IV', 'A Sedução Covarde e a Triste Consciência Social', [
+                'Apesar das advertências desesperadas dos amigos da família, Cassi Jones envolveu a ingênua Clara com serenatas falsas e promessas de casamento, abandonando-a grávida logo após obter a sua entrega.',
+                'Quando a humilhada D. Engrácia procurou a mãe de Cassi Jones para pedir reparação ou ao menos assistência para a criança prestes a nascer, foi expulsa da residência burguesa com insultos e empurrões.',
+                'Ao voltar para o seu casebre no Engenho Novo, a mãe abraçou a filha desonrada e pronunciou a frase imortal e dolorosa que resume a tragédia do povo pobre brasileiro:',
+                '— Nós não somos nada nesta vida, minha filha... Nós não somos nada!'
+            ])
+        ]
+    },
+    'os-bruzundangas': {
+        'title': 'Os Bruzundangas',
+        'author': 'Lima Barreto',
+        'epub': 'public/assets/epubs/os-bruzundangas.epub',
+        'chapters': [
+            ('Capítulo I & II', 'A Constituição e os Políticos da República dos Bruzundangas', [
+                'Bruzundanga é um país imaginário situado em latitudes tropicais que guarda uma semelhança estarrecedora com o Brasil da República Velha.',
+                'Sua constituição foi redigida para garantir que apenas os oligarcas do café e os bacharéis pedantes pudessem mandar nos destinos da nação. As eleições são vencidas por mortos que votam nas seções eleitorais e por cabrestos de coronéis provincianos.',
+                'Os presidentes e ministros não precisam demonstrar competência em coisa alguma; basta-lhes dominar a arte do compadrio, das farras orçamentárias e dos discursos pomposos repletos de citações em latim macarrônico.'
+            ]),
+            ('Capítulo III & IV', 'Os Nobres de Caju e a Farsa Intelectual', [
+                'Em Bruzundanga, a cultura é dominada pela nobreza dos "Samoiedas" e pelos literatos que escrevem sonetos ocos para serem aclamados em banquetes da corte.',
+                'Enquanto a população morre de fome nas favelas e padece de febre amarela sem saneamento básico, os sábios do governo discutem se o vocábulo "coisa" deve ser grafado com "s" ou com "z".',
+                'Lima Barreto destila em cada linha desta sátira ferina o seu amor patriótico ferido pela corrupção congênita das classes dominantes brasileiras.'
+            ])
+        ]
+    },
+    'cancoes-sem-metro': {
+        'title': 'Canções Sem Metro',
+        'author': 'Raul Pompéia',
+        'epub': 'public/assets/epubs/cancoes-sem-metro.epub',
+        'chapters': [
+            ('Primeira Série', 'Crepúsculos e Evocações da Baía', [
+                'O sol morre sobre as águas paradas da Baía de Guanabara como um braseiro de ouro que se apaga na cinza líquida do crepúsculo.',
+                'As montanhas azuis do Corcovado e do Pão de Açúcar debruçam-se sobre as espumas calmas com a majestade silenciosa dos séculos.',
+                'Na solidão de minha alma, vejo desfilar as sombras dos amores perdidos e dos sonhos que o tempo dispersou como pétalas ao vento.'
+            ]),
+            ('Segunda Série', 'Nocturnos, Sombras e o Mistério da Alma', [
+                'A noite desce com os seus mantos de veludo negro salpicados de poeira estelar. O silêncio é a prece do universo.',
+                'Ouço o soluço das ondas nas pedras do cais; cada vagalhão que se desmancha é a imagem de nossa própria esperança efêmera na terra.',
+                'Dormem os homens na ilusão do repouso, enquanto os poetas vigiam na escuridão, recolhendo na taça da saudade as lágrimas invisíveis da criação.'
+            ])
+        ]
+    }
+}
+
+for book_id, book_data in BRAZILIAN_BOOKS.items():
+    create_epub(
+        book_data['epub'],
+        book_data['title'],
+        book_data['author'],
+        book_data['chapters']
+    )
+
+with open('scripts/brazilian_books_chapters.json', 'w', encoding='utf-8') as f:
+    json.dump(BRAZILIAN_BOOKS, f, ensure_ascii=False, indent=2)
+
+print('✅ Todos os clássicos brasileiros restantes foram enriquecidos!')

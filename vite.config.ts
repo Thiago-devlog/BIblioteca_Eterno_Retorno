@@ -31,13 +31,126 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,jpg,jpeg,epub}'],
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,jpg,jpeg,webp,epub}'],
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
         },
         devOptions: {
           enabled: true,
           type: 'module',
         },
       }),
+      {
+        name: 'google-translate-proxy',
+        configureServer(server) {
+          server.middlewares.use('/api/translate', async (req, res) => {
+            if (req.method === 'POST') {
+              let body = '';
+              req.on('data', (chunk) => {
+                body += chunk;
+              });
+              req.on('end', async () => {
+                try {
+                  const { text, texts, targetLang = 'pt', sourceLang = 'auto' } = JSON.parse(body || '{}');
+
+                  // Função auxiliar para traduzir uma string individual
+                  const translateSingle = async (str: string) => {
+                    const trimmed = (str || '').trim();
+                    if (!trimmed) return { translatedText: str, detectedLang: sourceLang };
+                    const encoded = encodeURIComponent(trimmed);
+                    let translatedText = '';
+                    let detectedLang = sourceLang;
+
+                    // 1. Google Translate Chrome endpoint
+                    try {
+                      const c5Url = `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=${sourceLang}&tl=${targetLang}&q=${encoded}`;
+                      const c5Res = await fetch(c5Url, {
+                        headers: {
+                          'User-Agent':
+                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        },
+                      });
+                      if (c5Res.ok) {
+                        const data = await c5Res.json();
+                        if (Array.isArray(data) && data[0]) {
+                          translatedText = data[0][0] || '';
+                          detectedLang = data[0][1] || sourceLang;
+                        }
+                      }
+                    } catch {}
+
+                    // 2. Fallback gtx
+                    if (!translatedText) {
+                      try {
+                        const gtxUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encoded}`;
+                        const gtxRes = await fetch(gtxUrl, {
+                          headers: {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                          },
+                        });
+                        if (gtxRes.ok) {
+                          const data = await gtxRes.json();
+                          translatedText = (data[0] || [])
+                            .map((item: any) => item[0])
+                            .filter(Boolean)
+                            .join('');
+                          detectedLang = data[2] || sourceLang;
+                        }
+                      } catch {}
+                    }
+
+                    return {
+                      translatedText: translatedText || trimmed,
+                      detectedLang: detectedLang || sourceLang,
+                    };
+                  };
+
+                  // Suporte a lote (batch de múltiplos parágrafos)
+                  if (Array.isArray(texts)) {
+                    const results = await Promise.all(
+                      texts.map((p) => translateSingle(typeof p === 'string' ? p : ''))
+                    );
+                    res.setHeader('Content-Type', 'application/json');
+                    res.end(
+                      JSON.stringify({
+                        translations: results.map((r) => r.translatedText),
+                        targetLang,
+                        engine: 'google-translate',
+                      })
+                    );
+                    return;
+                  }
+
+                  if (!text || typeof text !== 'string') {
+                    res.statusCode = 400;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.end(JSON.stringify({ error: 'Text or texts parameter is required' }));
+                    return;
+                  }
+
+                  const singleResult = await translateSingle(text);
+
+                  res.setHeader('Content-Type', 'application/json');
+                  res.end(
+                    JSON.stringify({
+                      translatedText: singleResult.translatedText,
+                      detectedLang: singleResult.detectedLang,
+                      targetLang,
+                      engine: 'google-translate',
+                    })
+                  );
+                } catch (err: any) {
+                  res.statusCode = 500;
+                  res.setHeader('Content-Type', 'application/json');
+                  res.end(JSON.stringify({ error: err.message || 'Translation failed' }));
+                }
+              });
+            } else {
+              res.statusCode = 405;
+              res.end('Method Not Allowed');
+            }
+          });
+        },
+      },
     ],
     resolve: {
       alias: {

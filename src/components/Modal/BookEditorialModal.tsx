@@ -14,9 +14,11 @@ import {
   Loader2,
   Globe,
   ExternalLink,
+  Languages,
 } from 'lucide-react';
 import { generateAndDownloadBookPdf } from '../../utils/editorialPdfGenerator';
 import { motion } from 'motion/react';
+import { calculateBookReadingTimeMinutes, formatReadingTime } from '../../utils/readingTime';
 
 interface BookEditorialModalProps {
   book: BookItem | null;
@@ -64,16 +66,9 @@ export const BookEditorialModal: React.FC<BookEditorialModalProps> = ({
     }
   };
 
-  // Cálculo aproximado de tempo de leitura (200 palavras por minuto)
-  const totalWords = book.chapters.reduce(
-    (acc, chap) => acc + chap.content.join(' ').split(' ').length,
-    0
-  );
-  const readingTimeMin = Math.max(15, Math.round(totalWords / 150));
-  const readingTimeFormatted =
-    readingTimeMin > 60
-      ? `${Math.floor(readingTimeMin / 60)}h ${readingTimeMin % 60}min`
-      : `${readingTimeMin} min`;
+  // Cálculo refinado do tempo de leitura da obra completa
+  const readingTimeMin = calculateBookReadingTimeMinutes(book);
+  const readingTimeFormatted = formatReadingTime(readingTimeMin);
 
   const isCompleted = progressPercent >= 100;
 
@@ -247,6 +242,19 @@ export const BookEditorialModal: React.FC<BookEditorialModalProps> = ({
             </div>
           </div>
         )}
+
+        {/* Recurso Google Tradutor da Obra */}
+        <div className="flex items-center justify-between p-2.5 px-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 mb-5 text-xs text-amber-950">
+          <div className="flex items-center gap-2">
+            <Languages className="w-4 h-4 text-amber-700" />
+            <span className="font-sans font-semibold">
+              Google Tradutor Integrado
+            </span>
+          </div>
+          <span className="text-[11px] font-mono text-amber-800 font-medium hidden sm:inline">
+            Modo Bilíngue & Tradução Instantânea no Leitor
+          </span>
+        </div>
 
         {/* Botões de Ação Principais com Feedback Tátil */}
         <motion.div

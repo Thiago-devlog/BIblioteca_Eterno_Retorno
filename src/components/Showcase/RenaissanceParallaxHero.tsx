@@ -110,14 +110,14 @@ export const RenaissanceParallaxHero: React.FC<RenaissanceParallaxHeroProps> = (
   }[themeMode];
 
   return (
-    <div className="relative px-1 sm:px-2 mb-8 select-none">
+    <div className="relative px-0 mb-8 select-none">
       {/* CONTAINER 3D COM PERSPECTIVA RENASCENTISTA (1200px) */}
       <div
         ref={containerRef}
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
-        className={`relative w-full rounded-3xl overflow-hidden min-h-[520px] sm:min-h-[580px] md:min-h-[640px] lg:min-h-[700px] flex flex-col justify-between border bg-[#0C0806] transition-all duration-300 cursor-default ${themeBorder}`}
+        className={`relative w-full rounded-2xl sm:rounded-3xl overflow-hidden min-h-[520px] sm:min-h-[580px] md:min-h-[640px] lg:min-h-[700px] flex flex-col justify-between border bg-[#0C0806] transition-all duration-300 cursor-default ${themeBorder}`}
         style={{
           perspective: '1200px',
           transformStyle: 'preserve-3d',
@@ -136,10 +136,15 @@ export const RenaissanceParallaxHero: React.FC<RenaissanceParallaxHeroProps> = (
             className="absolute -inset-10 w-[calc(100%+80px)] h-[calc(100%+80px)] will-change-transform"
           >
             <img
-              src="/assets/hero/library_bg.jpg"
+              src="/assets/hero/library_bg.webp"
               alt="Pintura renascentista da biblioteca de Frank Moss Bennett"
               className="w-full h-full object-cover object-center filter brightness-[0.65] contrast-[1.12] sepia-[0.22]"
               loading="eager"
+              decoding="async"
+              onError={(e) => {
+                const t = e.currentTarget;
+                if (t.src.endsWith('.webp')) t.src = '/assets/hero/library_bg.jpg';
+              }}
             />
           </motion.div>
 
@@ -300,10 +305,15 @@ export const RenaissanceParallaxHero: React.FC<RenaissanceParallaxHeroProps> = (
             className="relative"
           >
             <img
-              src="/assets/hero/character_left_machado.png"
+              src="/assets/hero/character_left_machado.webp"
               alt="Retrato histórico a óleo autêntico de Machado de Assis com pincenê e traje formal"
               className="w-full h-auto object-contain filter drop-shadow-[0_20px_45px_rgba(0,0,0,0.92)] brightness-[0.98] contrast-[1.04]"
               loading="eager"
+              decoding="async"
+              onError={(e) => {
+                const t = e.currentTarget;
+                if (t.src.endsWith('.webp')) t.src = '/assets/hero/character_left_machado.png';
+              }}
             />
           </motion.div>
         </motion.div>
@@ -330,10 +340,15 @@ export const RenaissanceParallaxHero: React.FC<RenaissanceParallaxHeroProps> = (
             className="relative"
           >
             <img
-              src="/assets/hero/character_right_dostoevsky.png"
+              src="/assets/hero/character_right_dostoevsky.webp"
               alt="Pintura a óleo histórica de Fiódor Dostoiévski por Vasily Perov"
               className="w-full h-auto object-contain filter drop-shadow-[0_20px_45px_rgba(0,0,0,0.92)] brightness-[0.98] contrast-[1.04]"
               loading="eager"
+              decoding="async"
+              onError={(e) => {
+                const t = e.currentTarget;
+                if (t.src.endsWith('.webp')) t.src = '/assets/hero/character_right_dostoevsky.png';
+              }}
             />
           </motion.div>
         </motion.div>
