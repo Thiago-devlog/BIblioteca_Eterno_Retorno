@@ -1,235 +1,234 @@
 <div align="center">
 
-# 🏛️ Eterno Retorno
-### *Biblioteca Clássica & Leitor Imersivo da Literatura Universal*
+# Eterno Retorno
+### Biblioteca Clássica & Leitor Imersivo da Literatura Universal
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![PWA Ready](https://img.shields.io/badge/PWA-Offline_First-FF6F00?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-
-<br/>
-
-**Acervo histórico digital e leitor imersivo da literatura clássica lusófona e universal.**  
-Projetado com uma estética neoclássica e renascentista, reprodução física de estantes de madeira, sistema de fichário tátil de autores, motor de leitura EPUB 3.0 completo e tradução contextual instantânea no próprio dispositivo do leitor.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.0-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![PWA Ready](https://img.shields.io/badge/PWA-Offline_First-FF6F00?style=flat-square&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
 <br/>
 
-<img src="docs/images/demo-preview.gif" alt="Demonstração do Eterno Retorno" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+Plataforma de preservação cultural e leitor imersivo da literatura clássica universal e lusófona. O projeto combina estética neoclássica e renascentista, estantes tridimensionais de madeira e acrílico, fichário de autores, motor nativo de leitura EPUB 3.0 e sistema de tradução contextual no próprio dispositivo.
+
+<br/>
+
+<!-- Animação real em GIF do Hero com efeito Parallax suave dos personagens -->
+<img src="docs/images/hero-animation.gif" alt="Animação dos personagens no Hero Banner" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
 
 </div>
 
 ---
 
-## 📑 Sumário
+## Sumário
 
-- [Visão Geral](#-visão-geral)
-- [Demonstração Visual](#-demonstração-visual)
-- [Principais Funcionalidades](#-principais-funcionalidades)
-- [Catálogo de Obras Completas](#-catálogo-de-obras-completas)
-  - [Literatura Russa (Textos Integrais & Tradução)](#-literatura-russa)
-  - [Literatura Brasileira](#-literatura-brasileira)
-  - [Literatura Portuguesa & Clássicos Modernos](#-literatura-portuguesa--clássicos-modernos)
-- [Tradução Contextual no Dispositivo](#-tradução-contextual-no-dispositivo)
-- [Arquitetura & Estrutura do Projeto](#-arquitetura--estrutura-do-projeto)
-- [Tecnologias Utilizadas](#-tecnologias-utilizadas)
-- [Instalação & Execução](#-instalação--execução)
-- [Scripts do Projeto](#-scripts-do-projeto)
-- [PWA & Suporte Offline](#-pwa--suporte-offline)
-- [Licença](#-licença)
+1. [Sobre o Projeto](#sobre-o-projeto)
+2. [Demonstração da Interface Real](#demonstração-da-interface-real)
+3. [Recursos Principais](#recursos-principais)
+4. [Catálogo Completo de Obras](#catálogo-completo-de-obras)
+5. [Sistema de Tradução no Dispositivo](#sistema-de-tradução-no-dispositivo)
+6. [Arquitetura e Organização do Código](#arquitetura-e-organização-do-código)
+7. [Tecnologias Utilizadas](#tecnologias-utilizadas)
+8. [Instalação e Execução Passo a Passo](#instalação-e-execução-passo-a-passo)
+9. [Suporte Offline (PWA)](#suporte-offline-pwa)
+10. [Licença](#licença)
 
 ---
 
-## 🌟 Visão Geral
+## Sobre o Projeto
 
-O **Eterno Retorno** nasceu para superar a frieza dos leitores de e-books convencionais, unindo o prazer tátil do livro tradicional com a conveniência e tecnologia do mundo digital.
+O **Eterno Retorno** foi idealizado para proporcionar uma experiência de leitura que resgata a nobreza dos livros físicos, integrando recursos modernos do ecossistema web:
 
-Inspirado nas grandes bibliotecas renascentistas e no rigor editorial do século XIX, o projeto oferece:
-- **37 obras-primas da literatura universal e lusófona** em suas edições completas e canônicas.
-- **Tradução local instantânea** para que obras em língua estrangeira (como o cânone russo ou kafkaiano) possam ser lidas no idioma de preferência do leitor diretamente no navegador do dispositivo.
-- **Ambientes visuais alternáveis**: Hero Renascentista Parallax, Estante de Mogno Realista com lombadas douradas em couro, e Fichário Arquivístico com pastas de autores.
-- **Leitor minimalista de alta precisão tipográfica**: Modo sépia/pergaminho, controle de fontes (Garamond, Sans, OpenDyslexic), dicionário oitocentista de termos arcaicos e paisagens sonoras acústicas (chuva, biblioteca, lareira).
-
----
-
-## 📸 Demonstração Visual
-
-### 🏛️ 1. Vitrine da Biblioteca & Hero Renascentista Parallax
-Interface inspirada nas clássicas salas de leitura europeias, com iluminação dramática, estantes de vidro acrílico e dossiês dos grandes mestres (Machado de Assis, Dostoiévski, Tolstói, Eça de Queirós e Kafka).
-
-![Vitrine da Biblioteca](docs/images/hero-banner.jpg)
+- **Obras Integrais**: 37 livros completos com capítulos canônicos e diagramação cuidadosa.
+- **Leitor Adaptativo**: Controle de fonte, espaçamento, temas de iluminação (Claro, Escuro e Amarelado) e dicionário interativo do século XIX.
+- **Tradução Local**: Capacidade de traduzir parágrafos e capítulos de obras originalmente em outras línguas (russo, alemão) direto no navegador do leitor.
+- **Paisagens Sonoras Acústicas**: Sons ambientes de chuva na janela, biblioteca antiga, lareira e salão clássico gerados diretamente por áudio procedural.
 
 ---
 
-### 🪵 2. Estante Realista em Madeira de Mogno
-Lombadas físicas texturizadas em couro envelhecido com detalhes em folha de ouro, classificação temática, etiquetas de latão e gaveteiro de arquivo catalográfico tátil.
+## Demonstração da Interface Real
 
-![Estante Realista em Mogno](docs/images/bookshelf-view.jpg)
+Abaixo estão as capturas diretas da aplicação em funcionamento:
 
----
+### 1. Banner Hero com Efeito Parallax e Seleção de Temas
+Composição visual com plano de fundo de biblioteca clássica, iluminação suave e personagens históricos (Machado de Assis e Fiódor Dostoiévski) que reagem ao movimento do mouse com rotação e profundidade.
 
-### 📖 3. Leitor Imersivo Minimalista com Glossário & Tradução
-Leitor focado em imersão com papel envelhecido, diagramação clássica, identificador de tradução bilíngue, popover explicativo para termos do século XIX e controle de som ambiente relaxante.
-
-![Leitor Imersivo Minimalista](docs/images/reader-view.jpg)
+![Banner Hero Real](docs/images/real-hero-banner.png)
 
 ---
 
-## ⚡ Principais Funcionalidades
+### 2. Estantes de Acrílico e Organização por Autores
+Visualização moderna em estantes de acrílico translúcido com fixações metálicas, capas estilizadas, contagem de páginas e estimativa do tempo de leitura.
 
-### 📖 Motor de Leitura EPUB 3.0 Nativo
-- **Renderização e paginação precisa** de arquivos `.epub` através de descompactação e parsing de manifestos OPF/XHTML sob demanda.
-- **Progresso de leitura persistente**: Percentual lido, tempo estimado restante e última posição salvos automaticamente no `localStorage`.
-- **Modos de Exibição**:
-  - *Pergaminho Histórico* (textura suave de papel antigo)
-  - *Modo Noturno / Darkroom* (fundo carvão com texto âmbar)
-  - *Modo Sepia Editorial* (tons quentes para leitura diurna relaxante)
-- **Controle Tipográfico Total**: Ajuste fino de tamanho de fonte, espaçamento entre linhas (line-height), largura máxima da mancha de texto e fontes serifadas/sans/acessíveis.
-
-### 🌐 Tradução Instantânea no Dispositivo
-- Para obras estrangeiras (como o cânone russo ou Franz Kafka), o leitor permite alternar entre o texto em português e o texto original/inglês com um clique.
-- **Mecanismo de Tradução Local e Conexão Híbrida**: Tradução parágrafo a parágrafo sem quebrar a pontuação, métrica literária ou diagramação.
-- **Fallback resiliente**: Dicionários locais integrados garantem funcionamento contínuo mesmo em redes lentas ou instáveis.
-
-### 📜 Glossário Oitocentista & Dicionário Arcaico
-- Dicionário com centenas de verbetes do século XIX (termos arcaicos, jurídicos e expressões de época usadas por Machado de Assis, José de Alencar, Aluísio Azevedo e Eça de Queirós).
-- Ao clicar ou tocar em palavras destacadas, surge um **popover elegante** com a etimologia e significado contextual.
-
-### 🎧 Paisagens Sonoras Ambientes (Soundscapes)
-Sintetizador e reprodutor de áudio procedural com 4 ambientes literários:
-- 🌧️ **Chuva na Vidraça**
-- 🏛️ **Biblioteca Antiga**
-- 🔥 **Lareira Crepitante**
-- 🎻 **Salão Clássico**
-
-### 🎨 Gerador de Citações & Exportador Editorial PDF
-- **Card Tipográfico**: Selecione qualquer trecho marcante e gere um card visual refinado pronto para compartilhar nas redes sociais.
-- **Exportação para PDF**: Diagramação automática com capa, índice, notas de rodapé e tipografia de livro impresso com `jsPDF`.
+![Estantes de Acrílico Reais](docs/images/real-acrylic-shelves.png)
 
 ---
 
-## 📚 Catálogo de Obras Completas
+### 3. Modal Editorial da Obra
+Ao clicar em qualquer livro, o leitor tem acesso a citações marcantes, sinopse, dados históricos, indicação de tradução integrada e botão para iniciar a leitura.
 
-O acervo do **Eterno Retorno** conta com **37 obras integrais** distribuídas entre os maiores autores do cânone ocidental:
+![Modal Editorial da Obra Real](docs/images/real-book-modal.png)
 
-### 🇷🇺 Literatura Russa
-| Autor | Obra | Capítulos | Destaques |
-| :--- | :--- | :---: | :--- |
-| **Fiódor Dostoiévski** | *Crime e Castigo* | 6 Partes + Epílogo | O dilema moral de Raskólnikov em São Petersburgo |
-| **Fiódor Dostoiévski** | *Os Irmãos Karamázov* | 12 Livros + Epílogo | A lenda do Grande Inquisidor e o drama dos Karamázov |
-| **Fiódor Dostoiévski** | *Noites Brancas* | 6 Partes (Noites I a IV, Manhã) | O romance lírico e sonhador de Petersburgo |
-| **Fiódor Dostoiévski** | *Memórias do Subsolo* | 2 Partes Completas | O monólogo filosófico do homem do subterrâneo |
-| **Fiódor Dostoiévski** | *O Idiota* | 4 Partes | A pureza trágica do Príncipe Míchkin |
-| **Lev Tolstói** | *Guerra e Paz* | Volumes I a IV + Epílogo | A invasão napoleônica e o destino das famílias russas |
-| **Lev Tolstói** | *Anna Kariênina* | 8 Partes Completas | Paixão, moral social e a busca espiritual de Levin |
-| **Lev Tolstói** | *A Morte de Ivan Ilitch* | 12 Capítulos Integrais | A mais profunda reflexão da literatura sobre a mortalidade |
+---
 
-### 🇧🇷 Literatura Brasileira
-| Autor | Obras Disponíveis |
+### 4. Leitor Imersivo em Modo Noturno e Ajustes de Leitura
+Ambiente de leitura sem distrações com tipografia nítida, aviso de tradução ativa, seleção de tamanho de fonte, ambiência sonora e opções de download em EPUB e PDF editorial.
+
+![Leitor Imersivo Real](docs/images/real-reader-view.png)
+
+---
+
+### 5. Dossiês Biográficos e Arquivo dos Autores
+Dossiês completos com dados históricos, contexto literário, retrato biográfico e lista cronológica das publicações de cada autor.
+
+![Dossiês dos Autores](docs/images/real-author-dossiers.png)
+
+---
+
+## Recursos Principais
+
+### Motor EPUB 3.0 Nativo
+- Descompactação em tempo real via JSZip e parser DOM de manifestos OPF e arquivos XHTML.
+- Paginação precisa com cálculo dinâmico baseado no tamanho da tela do dispositivo.
+- Salvamento automático da posição de leitura e percentual concluído no armazenamento local (`localStorage`).
+
+### Tradução no Dispositivo do Usuário
+- Para leitores que acessam obras de autores estrangeiros (Dostoiévski, Tolstói e Kafka), o leitor permite alternar entre a versão traduzida e o original.
+- O processo é feito por parágrafos para não quebrar a estrutura literária ou o ritmo dos diálogos.
+
+### Dicionário do Século XIX
+- Dicionário embutido com centenas de verbetes e arcaísmos presentes na literatura oitocentista.
+- Ao selecionar ou tocar nas palavras destacadas, uma janela contextual exibe a etimologia e o significado na época em que a obra foi escrita.
+
+### Modos Visuais e Ergonomia de Leitura
+- **Modo Claro**: Fundo pergaminho suave para leitura em ambientes bem iluminados.
+- **Modo Escuro / Noturno**: Fundo preto azulado com contraste atenuado para leitura noturna sem fadiga ocular.
+- **Modo Amarelado (Âmbar)**: Filtro de luz azul, ideal para descanso visual antes de dormir.
+
+---
+
+## Catálogo Completo de Obras
+
+O acervo contém **37 obras integrais**, estruturadas em edições definitivas:
+
+### Literatura Russa
+| Autor | Título | Estrutura |
+| :--- | :--- | :--- |
+| Fiódor Dostoiévski | *Crime e Castigo* | 6 Partes e Epílogo |
+| Fiódor Dostoiévski | *Os Irmãos Karamázov* | 12 Livros e Epílogo |
+| Fiódor Dostoiévski | *Noites Brancas* | 6 Partes (Noites I a IV e Manhã) |
+| Fiódor Dostoiévski | *Memórias do Subsolo* | 2 Partes Completas |
+| Fiódor Dostoiévski | *O Idiota* | 4 Partes Completas |
+| Lev Tolstói | *Guerra e Paz* | Volumes I a IV e Epílogo |
+| Lev Tolstói | *Anna Kariênina* | 8 Partes Completas |
+| Lev Tolstói | *A Morte de Ivan Ilitch* | 12 Capítulos Integrais |
+
+### Literatura Brasileira
+| Autor | Obras Inclusas |
 | :--- | :--- |
-| **Machado de Assis** | *Dom Casmurro*, *Memórias Póstumas de Brás Cubas*, *Quincas Borba*, *O Alienista*, *Esaú e Jacó*, *Memorial de Aires*, *Poesias Completas* |
-| **Lima Barreto** | *Triste Fim de Policarpo Quaresma*, *Recordações do Escrivão Isaías Caminha*, *Clara dos Anjos*, *Os Bruzundangas* |
-| **Aluísio Azevedo** | *O Cortiço*, *O Mulato*, *Casa de Pensão* |
-| **José de Alencar** | *O Guarani (Vols. I e II)*, *Iracema*, *Senhora*, *Lucíola* |
-| **Raul Pompéia** | *O Ateneu*, *Canções Sem Metro* |
-| **Castro Alves** | *O Navio Negreiro*, *Espumas Flutuantes*, *Vozes d’África* |
+| Machado de Assis | *Dom Casmurro*, *Memórias Póstumas de Brás Cubas*, *Quincas Borba*, *O Alienista*, *Esaú e Jacó*, *Memorial de Aires*, *Poesias Completas* |
+| Lima Barreto | *Triste Fim de Policarpo Quaresma*, *Recordações do Escrivão Isaías Caminha*, *Clara dos Anjos*, *Os Bruzundangas* |
+| Aluísio Azevedo | *O Cortiço*, *O Mulato*, *Casa de Pensão* |
+| José de Alencar | *O Guarani (Volumes I e II)*, *Iracema*, *Senhora*, *Lucíola* |
+| Raul Pompéia | *O Ateneu*, *Canções Sem Metro* |
+| Castro Alves | *O Navio Negreiro*, *Espumas Flutuantes*, *Vozes d’África* |
 
-### 🇵🇹 Literatura Portuguesa & Clássicos Modernos
-| Autor | Obras Disponíveis |
+### Literatura Portuguesa e Clássicos Mundiais
+| Autor | Obras Inclusas |
 | :--- | :--- |
-| **Eça de Queirós** | *Os Maias*, *O Primo Basílio*, *O Crime do Padre Amaro*, *A Cidade e as Serras* |
-| **Franz Kafka** | *A Metamorfose* (3 Capítulos Integrais), *O Processo* (10 Capítulos Integrais) |
+| Eça de Queirós | *Os Maias*, *O Primo Basílio*, *O Crime do Padre Amaro*, *A Cidade e as Serras* |
+| Franz Kafka | *A Metamorfose* (3 Capítulos), *O Processo* (10 Capítulos) |
 
 ---
 
-## 🌐 Tradução Contextual no Dispositivo
+## Sistema de Tradução no Dispositivo
 
-Para atender a leitores em diferentes regiões ou preferências de leitura de obras traduzidas:
+Para garantir acessibilidade a leitores de diferentes países e dispositivos:
 
-1. **Leitura na Língua Nativa do Usuário**: Se a obra for estrangeira (Russa ou Alemã) e o leitor desejar ler na língua local do seu aparelho, o botão de tradução no leitor realiza a conversão contextual sob demanda.
-2. **Preservação de Formatação**: Parágrafos, diálogos com travessão e notas de autor mantêm seu alinhamento original.
-3. **Cache Inteligente**: Textos traduzidos são armazenados no cache da sessão para que releituras de capítulos ocorram de forma instantânea e sem consumo redundante de dados.
+1. **Detecção e Ajuste**: Ao abrir uma obra russa ou de outra língua de origem, o aplicativo verifica se a visualização traduzida está selecionada.
+2. **Tradução por Blocos de Parágrafos**: O texto é processado de forma granular, mantendo as quebras de linha e a pontuação originais.
+3. **Memória de Cache**: Parágrafos já traduzidos ficam armazenados na sessão, evitando requisições repetidas e permitindo leitura fluida mesmo com oscilações de internet.
 
 ---
 
-## 🏗️ Arquitetura & Estrutura do Projeto
+## Arquitetura e Organização do Código
 
 ```text
 eterno-retorno/
-├── docs/                           # Documentação e mídias visuais
+├── docs/                           # Documentação e recursos visuais
 │   └── images/
-│       ├── demo-preview.gif        # GIF animado de demonstração da plataforma
-│       ├── hero-banner.jpg         # Screenshot da Vitrine Renascentista
-│       ├── bookshelf-view.jpg      # Screenshot da Estante Realista em Mogno
-│       └── reader-view.jpg         # Screenshot do Leitor com Glossário e Tradução
-├── public/                         # Arquivos estáticos servidos pelo Vite
+│       ├── hero-animation.gif      # GIF com a animação real dos personagens no Hero
+│       ├── real-hero-banner.png    # Captura da interface do Hero
+│       ├── real-acrylic-shelves.png# Captura das estantes de acrílico
+│       ├── real-book-modal.png     # Captura do modal editorial do livro
+│       ├── real-reader-view.png    # Captura do leitor imersivo em modo escuro
+│       └── real-author-dossiers.png# Captura do arquivo de dossiês dos autores
+├── public/
 │   ├── assets/
-│   │   ├── epubs/                  # 37 arquivos .epub canônicos completos
-│   │   ├── authors/                # Retratos biográficos em alta definição
-│   │   └── hero/                   # Texturas renascentistas e recortes de autor
-│   └── icon.svg                    # Ícone da aplicação e manifesto PWA
-├── scripts/                        # Ferramentas de geração e auditoria do acervo
+│   │   ├── epubs/                  # Arquivos .epub das 37 obras completas
+│   │   ├── authors/                # Retratos biográficos em alta resolução
+│   │   └── hero/                   # Texturas e recortes em PNG dos autores
+│   └── icon.svg                    # Ícone vetorial da biblioteca
+├── scripts/                        # Scripts de automação e geração de dados
+│   ├── record_hero_and_screenshots.js # Automação Playwright para capturas
 │   ├── generate_russian_classics_full.py
-│   ├── generate_brazilian_classics_full.py
-│   └── patch_catalog_complete_works.py
+│   └── generate_brazilian_classics_full.py
 ├── src/
 │   ├── components/
-│   │   ├── Bookshelf/              # Componente 3D realista da estante de madeira
-│   │   ├── Home/                   # Feed editorial, banner hero e busca
-│   │   ├── Layout/                 # Barra superior e rodapé neoclássicos
-│   │   ├── Modal/                  # Modais de dossiê do autor e resenha crítica
-│   │   ├── Navigation/             # Barra de navegação inferior mobile/desktop
-│   │   ├── PWA/                    # Notificações de instalação e indicador offline
-│   │   ├── Quotes/                 # Gerador de cartões de citação exportáveis
-│   │   ├── Reader/                 # Leitor minimalista, tradutor e glossário
-│   │   └── Showcase/               # Vitrine acrílica e heróis paralaxe
+│   │   ├── Bookshelf/              # Estante 3D de madeira com lombadas em couro
+│   │   ├── Home/                   # Componentes da página inicial e busca
+│   │   ├── Layout/                 # Barra superior e rodapé
+│   │   ├── Modal/                  # Modais editoriais do livro e do autor
+│   │   ├── Navigation/             # Barra de navegação inferior
+│   │   ├── PWA/                    # Gerenciador de instalação e offline
+│   │   ├── Quotes/                 # Gerador de cartões de citação compartilháveis
+│   │   ├── Reader/                 # Leitor minimalista, dicionário e tradutor
+│   │   └── Showcase/               # Hero Parallax e vitrine acrílica
 │   ├── data/
-│   │   ├── catalog.ts              # Catálogo unificado com 37 livros e capítulos
-│   │   └── glossary19thCentury.ts  # Dicionário oitocentista com centenas de verbetes
+│   │   ├── catalog.ts              # Catálogo unificado com todas as 37 obras
+│   │   └── glossary19thCentury.ts  # Glossário oitocentista com centenas de verbetes
 │   ├── services/
-│   │   ├── ambientAudioService.ts  # Motor de áudio de fundo (chuva, biblioteca, lareira)
-│   │   └── translatorService.ts    # Serviço de tradução bilíngue no dispositivo
+│   │   ├── ambientAudioService.ts  # Sintetizador procedural de áudio ambiente
+│   │   └── translatorService.ts    # Serviço de tradução bilíngue
 │   ├── utils/
-│   │   ├── editorialPdfGenerator.ts# Exportador de PDF diagramado
-│   │   ├── epubLoader.ts           # Descompressor e parser de EPUB sob demanda
-│   │   └── readingTime.ts          # Cálculo ergonômico de tempo de leitura
-│   ├── App.tsx                     # Roteamento e gerenciamento de estado global
+│   │   ├── editorialPdfGenerator.ts# Diagramador de PDF para impressão
+│   │   ├── epubLoader.ts           # Descompressor e analisador de EPUBs
+│   │   └── readingTime.ts          # Algoritmo de cálculo de tempo de leitura
+│   ├── App.tsx                     # Ponto central de estado e roteamento
 │   ├── index.css                   # Tailwind CSS v4 e temas de leitura
-│   └── main.tsx                    # Ponto de entrada React 19
-├── index.html                      # Ponto de entrada HTML com metadados e PWA
-├── package.json                    # Dependências e scripts do projeto
-├── tsconfig.json                   # Configuração rigorosa do TypeScript
-└── vite.config.ts                  # Configuração Vite com suporte a PWA e assets
+│   └── main.tsx                    # Inicialização do React 19
+├── package.json                    # Dependências e comandos do projeto
+└── vite.config.ts                  # Configuração do Vite e PWA
 ```
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
-- **Frontend Core**: [React 19](https://react.dev/) com componentes funcionais e hooks reativos.
-- **Tipagem**: [TypeScript 5](https://www.typescriptlang.org/) garantindo segurança de tipos estritos em todo o catálogo e no leitor.
-- **Estilização**: [Tailwind CSS v4](https://tailwindcss.com/) com paleta personalizada (mogno, pergaminho, veludo e latão dourado).
-- **Animações**: [Motion](https://motion.dev/) para transições fluidas de gaveteiros, drawers e virada de páginas.
-- **Ícones**: [Lucide React](https://lucide.dev/) para iconografia minimalista.
-- **Processamento de EPUB**: [JSZip](https://stuk.github.io/jszip/) para descompactação no navegador e parser DOM nativo para XHTML/OPF.
-- **Exportação Editorial**: [jsPDF](https://github.com/parallax/jsPDF) para gerar volumes impressos em PDF em alta resolução.
-- **PWA & Cache**: [Vite PWA Plugin](https://vite-pwa-org.netlify.app/) para suporte offline integral.
-- **Build & Dev Server**: [Vite 8](https://vitejs.dev/) ultra-rápido com HMR.
+- **React 19**: Biblioteca base para a interface reativa e modular.
+- **TypeScript 5**: Tipagem estrita em todo o fluxo de dados, catálogo e leitores.
+- **Tailwind CSS v4**: Motor moderno de estilização utilitária de alto desempenho.
+- **Motion**: Biblioteca de animações físicas para transições e o efeito Parallax 3D.
+- **Playwright**: Automação de navegadores para testes e captura de imagens reais do sistema.
+- **JSZip**: Descompactação nativa de arquivos `.epub` no navegador.
+- **jsPDF**: Geração de documentos PDF diagramados no padrão de livro físico.
+- **Vite 8**: Servidor de desenvolvimento ultrarrápido e empacotador de produção.
 
 ---
 
-## 🚀 Instalação & Execução
+## Instalação e Execução Passo a Passo
 
 ### Pré-requisitos
-- **Node.js** >= 18.0.0
-- **npm** ou **bun**
+- **Node.js** na versão 18 ou superior.
+- Gerenciador de pacotes **npm** ou **bun**.
 
 ### 1. Clonar o Repositório
 ```bash
-git clone https://github.com/seu-usuario/eterno-retorno.git
-cd eterno-retorno
+git clone https://github.com/Thiago-devlog/BIblioteca_Eterno_Retorno.git
+cd BIblioteca_Eterno_Retorno
 ```
 
 ### 2. Instalar as Dependências
@@ -241,56 +240,26 @@ npm install
 ```bash
 npm run dev
 ```
-O aplicativo estará disponível em: **`http://localhost:3000`**
+Abra o navegador no endereço: `http://localhost:3000`
 
 ### 4. Compilar para Produção
 ```bash
 npm run build
 ```
-Os arquivos otimizados serão gerados na pasta `dist/`.
+Os arquivos otimizados para publicação em servidor web serão salvos no diretório `dist/`.
 
 ---
 
-## ⚙️ Scripts do Projeto
+## Suporte Offline (PWA)
 
-| Comando | Descrição |
-| :--- | :--- |
-| `npm run dev` | Inicia o servidor local de desenvolvimento na porta 3000 |
-| `npm run build` | Compila o aplicativo TypeScript e gera o bundle de produção com Vite |
-| `npm run preview` | Executa um servidor local para visualizar a versão de produção |
-| `npm run lint` | Executa o verificador de tipos do TypeScript (`tsc --noEmit`) |
-| `npm run clean` | Remove as pastas temporárias de build (`dist/`) |
+O aplicativo conta com suporte para instalação como aplicativo progressivo (PWA):
+- Uma vez aberto no navegador, as obras visitadas e os arquivos da interface são armazenados no cache local via Service Worker.
+- O leitor pode utilizar o aplicativo mesmo sem sinal de internet em celulares, tablets ou computadores.
+- As anotações, histórico e percentual lido permanecem sincronizados localmente no dispositivo.
 
 ---
 
-## 📱 PWA & Suporte Offline
+## Licença
 
-O **Eterno Retorno** foi projetado seguindo a filosofia **Offline-First**:
-- Todos os arquivos `.epub` das obras são mantidos em cache local via Service Worker assim que solicitados.
-- Ao adicionar o app à tela inicial do celular ou tablet (PWA), você pode ler as obras em aviões, metrô ou locais sem sinal de internet.
-- O progresso de leitura, notas e citações são mantidos no banco de dados local do navegador (`localStorage` / `IndexedDB`).
-
----
-
-## 🤝 Como Contribuir
-
-Contribuições são muito bem-vindas! Se você deseja adicionar novas obras de domínio público, corrigir edições textuais ou aprimorar o leitor:
-
-1. Faça um Fork do projeto (`fork`).
-2. Crie uma branch para sua funcionalidade: `git checkout -b feature/nova-obra`.
-3. Commit suas alterações: `git commit -m 'feat: Adiciona Memórias de um Sargento de Milícias'`.
-4. Envie para o branch remoto: `git push origin feature/nova-obra`.
-5. Abra um **Pull Request**.
-
----
-
-## 📜 Licença
-
-Este projeto é distribuído sob a licença **MIT**. Consulte o arquivo [LICENSE](LICENSE) para obter mais informações.  
-*Todas as obras literárias disponibilizadas no acervo são de Domínio Público.*
-
-<br/>
-
-<div align="center">
-  <sub>Desenvolvido com apreço pelas grandes letras da humanidade.</sub>
-</div>
+Este projeto está licenciado sob a licença **MIT** — consulte o arquivo [LICENSE](LICENSE) para obter detalhes.  
+As obras literárias disponibilizadas no acervo são de **Domínio Público**.
