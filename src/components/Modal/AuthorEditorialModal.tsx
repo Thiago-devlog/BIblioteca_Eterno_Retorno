@@ -299,9 +299,12 @@ export const AuthorEditorialModal: React.FC<AuthorEditorialModalProps> = ({
                     <div
                       className="w-10 h-14 rounded-sm p-1 flex flex-col justify-between text-center shrink-0 shadow-sm border"
                       style={{
-                        backgroundColor: book.coverBg,
-                        borderColor: book.coverBorder,
-                        color: book.coverAccent,
+                        backgroundColor: book.coverBg || '#FAF6ED',
+                        borderColor: book.coverBorder || '#D8CEB7',
+                        color:
+                          book.coverBg === '#FAF6ED' || book.coverBg === '#EFE7D8' || book.coverBg === '#ECE3D0'
+                            ? '#1A1412'
+                            : book.coverAccent || '#F3D27E',
                       }}
                     >
                       <span className="text-[7px] font-mono font-bold leading-none">

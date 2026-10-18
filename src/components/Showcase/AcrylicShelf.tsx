@@ -33,64 +33,118 @@ export const AcrylicShelf: React.FC<AcrylicShelfProps> = ({
     });
   };
 
-  // Cores de vidro/acrílico fosco elegante com backdrop-blur-md, borda superior de 1px e sombra projetada
-  const shelfStyles = {
+  // Cores táteis, vibrantes e translúcidas de acrílico com inline styles garantidos contra purge do Tailwind/Vercel
+  const shelfThemeConfig = {
     amber: {
-      lipBg: 'bg-gradient-to-b from-[#F59E0B]/30 via-[#EA580C]/35 to-[#D97706]/45',
-      lipBorder: 'border-[#F59E0B]/30',
-      lipShadow: 'shadow-[0_12px_28px_-5px_rgba(234,88,12,0.28)]',
-      highlight: 'bg-gradient-to-r from-transparent via-white/50 to-transparent',
-      woodTone: 'from-[#451A03] via-[#78350F] to-[#451A03]',
-    },
-    blue: {
-      lipBg: 'bg-gradient-to-b from-[#38BDF8]/30 via-[#0284C7]/35 to-[#0369A1]/45',
-      lipBorder: 'border-[#38BDF8]/30',
-      lipShadow: 'shadow-[0_12px_28px_-5px_rgba(2,132,199,0.28)]',
-      highlight: 'bg-gradient-to-r from-transparent via-white/50 to-transparent',
-      woodTone: 'from-[#0F172A] via-[#1E293B] to-[#0F172A]',
-    },
-    emerald: {
-      lipBg: 'bg-gradient-to-b from-[#34D399]/30 via-[#059669]/35 to-[#047857]/45',
-      lipBorder: 'border-[#34D399]/30',
-      lipShadow: 'shadow-[0_12px_28px_-5px_rgba(5,150,105,0.28)]',
-      highlight: 'bg-gradient-to-r from-transparent via-white/50 to-transparent',
-      woodTone: 'from-[#14532D] via-[#166534] to-[#14532D]',
-    },
-    frosted: {
-      lipBg: 'bg-gradient-to-b from-white/60 via-white/50 to-slate-200/60',
-      lipBorder: 'border-slate-300/40',
-      lipShadow: 'shadow-[0_12px_28px_-5px_rgba(0,0,0,0.14)]',
-      highlight: 'bg-gradient-to-r from-transparent via-white/70 to-transparent',
-      woodTone: 'from-[#334155] via-[#475569] to-[#334155]',
+      dot: '#D97706',
+      floorBg:
+        themeMode === 'dark'
+          ? 'linear-gradient(180deg, rgba(245, 158, 11, 0.18) 0%, rgba(30, 41, 59, 0.88) 45%, rgba(15, 23, 42, 0.96) 100%)'
+          : themeMode === 'amber'
+          ? 'linear-gradient(180deg, rgba(251, 191, 36, 0.38) 0%, rgba(250, 241, 220, 0.95) 45%, rgba(234, 216, 181, 0.98) 100%)'
+          : 'linear-gradient(180deg, rgba(254, 243, 199, 0.85) 0%, rgba(253, 230, 138, 0.40) 45%, rgba(248, 250, 252, 0.96) 100%)',
+      floorBorder:
+        themeMode === 'dark'
+          ? 'rgba(245, 158, 11, 0.38)'
+          : themeMode === 'amber'
+          ? 'rgba(217, 119, 6, 0.45)'
+          : 'rgba(245, 158, 11, 0.45)',
+      lipBg: 'linear-gradient(180deg, rgba(245, 158, 11, 0.65) 0%, rgba(234, 88, 12, 0.72) 48%, rgba(217, 119, 6, 0.82) 100%)',
+      lipBorder: 'rgba(251, 191, 36, 0.75)',
+      lipShadow: '0 14px 30px -4px rgba(234, 88, 12, 0.50), inset 0 1px 2px rgba(255, 255, 255, 0.70)',
+      woodTone: 'linear-gradient(90deg, #451A03 0%, #78350F 50%, #451A03 100%)',
     },
     ruby: {
-      lipBg: 'bg-gradient-to-b from-[#F43F5E]/30 via-[#E11D48]/35 to-[#BE123C]/45',
-      lipBorder: 'border-[#F43F5E]/30',
-      lipShadow: 'shadow-[0_12px_28px_-5px_rgba(225,29,72,0.28)]',
-      highlight: 'bg-gradient-to-r from-transparent via-white/50 to-transparent',
-      woodTone: 'from-[#4C0519] via-[#881337] to-[#4C0519]',
+      dot: '#E11D48',
+      floorBg:
+        themeMode === 'dark'
+          ? 'linear-gradient(180deg, rgba(225, 29, 72, 0.18) 0%, rgba(30, 41, 59, 0.88) 45%, rgba(15, 23, 42, 0.96) 100%)'
+          : themeMode === 'amber'
+          ? 'linear-gradient(180deg, rgba(251, 113, 133, 0.32) 0%, rgba(250, 241, 220, 0.95) 45%, rgba(234, 216, 181, 0.98) 100%)'
+          : 'linear-gradient(180deg, rgba(255, 228, 230, 0.85) 0%, rgba(254, 205, 211, 0.40) 45%, rgba(248, 250, 252, 0.96) 100%)',
+      floorBorder:
+        themeMode === 'dark'
+          ? 'rgba(225, 29, 72, 0.38)'
+          : themeMode === 'amber'
+          ? 'rgba(225, 29, 72, 0.45)'
+          : 'rgba(244, 63, 94, 0.45)',
+      lipBg: 'linear-gradient(180deg, rgba(244, 63, 94, 0.65) 0%, rgba(225, 29, 72, 0.72) 48%, rgba(190, 18, 60, 0.82) 100%)',
+      lipBorder: 'rgba(251, 113, 133, 0.75)',
+      lipShadow: '0 14px 30px -4px rgba(225, 29, 72, 0.50), inset 0 1px 2px rgba(255, 255, 255, 0.70)',
+      woodTone: 'linear-gradient(90deg, #4C0519 0%, #881337 50%, #4C0519 100%)',
+    },
+    blue: {
+      dot: '#0284C7',
+      floorBg:
+        themeMode === 'dark'
+          ? 'linear-gradient(180deg, rgba(2, 132, 199, 0.18) 0%, rgba(30, 41, 59, 0.88) 45%, rgba(15, 23, 42, 0.96) 100%)'
+          : themeMode === 'amber'
+          ? 'linear-gradient(180deg, rgba(125, 211, 252, 0.32) 0%, rgba(250, 241, 220, 0.95) 45%, rgba(234, 216, 181, 0.98) 100%)'
+          : 'linear-gradient(180deg, rgba(224, 242, 254, 0.85) 0%, rgba(186, 230, 253, 0.40) 45%, rgba(248, 250, 252, 0.96) 100%)',
+      floorBorder:
+        themeMode === 'dark'
+          ? 'rgba(2, 132, 199, 0.38)'
+          : themeMode === 'amber'
+          ? 'rgba(2, 132, 199, 0.45)'
+          : 'rgba(56, 189, 248, 0.45)',
+      lipBg: 'linear-gradient(180deg, rgba(56, 189, 248, 0.65) 0%, rgba(2, 132, 199, 0.72) 48%, rgba(3, 105, 161, 0.82) 100%)',
+      lipBorder: 'rgba(125, 211, 252, 0.75)',
+      lipShadow: '0 14px 30px -4px rgba(2, 132, 199, 0.50), inset 0 1px 2px rgba(255, 255, 255, 0.70)',
+      woodTone: 'linear-gradient(90deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)',
+    },
+    emerald: {
+      dot: '#059669',
+      floorBg:
+        themeMode === 'dark'
+          ? 'linear-gradient(180deg, rgba(5, 150, 105, 0.18) 0%, rgba(30, 41, 59, 0.88) 45%, rgba(15, 23, 42, 0.96) 100%)'
+          : themeMode === 'amber'
+          ? 'linear-gradient(180deg, rgba(110, 231, 183, 0.32) 0%, rgba(250, 241, 220, 0.95) 45%, rgba(234, 216, 181, 0.98) 100%)'
+          : 'linear-gradient(180deg, rgba(209, 250, 229, 0.85) 0%, rgba(167, 243, 208, 0.40) 45%, rgba(248, 250, 252, 0.96) 100%)',
+      floorBorder:
+        themeMode === 'dark'
+          ? 'rgba(5, 150, 105, 0.38)'
+          : themeMode === 'amber'
+          ? 'rgba(5, 150, 105, 0.45)'
+          : 'rgba(52, 211, 153, 0.45)',
+      lipBg: 'linear-gradient(180deg, rgba(52, 211, 153, 0.65) 0%, rgba(5, 150, 105, 0.72) 48%, rgba(4, 120, 87, 0.82) 100%)',
+      lipBorder: 'rgba(110, 231, 183, 0.75)',
+      lipShadow: '0 14px 30px -4px rgba(5, 150, 105, 0.50), inset 0 1px 2px rgba(255, 255, 255, 0.70)',
+      woodTone: 'linear-gradient(90deg, #14532D 0%, #166534 50%, #14532D 100%)',
+    },
+    frosted: {
+      dot: '#475569',
+      floorBg:
+        themeMode === 'dark'
+          ? 'linear-gradient(180deg, rgba(148, 163, 184, 0.18) 0%, rgba(30, 41, 59, 0.88) 45%, rgba(15, 23, 42, 0.96) 100%)'
+          : themeMode === 'amber'
+          ? 'linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(250, 241, 220, 0.95) 45%, rgba(234, 216, 181, 0.98) 100%)'
+          : 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.75) 45%, rgba(226, 232, 240, 0.98) 100%)',
+      floorBorder:
+        themeMode === 'dark'
+          ? 'rgba(148, 163, 184, 0.38)'
+          : themeMode === 'amber'
+          ? 'rgba(216, 194, 157, 0.9)'
+          : 'rgba(203, 213, 225, 0.9)',
+      lipBg: 'linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(241, 245, 249, 0.75) 48%, rgba(203, 213, 225, 0.85) 100%)',
+      lipBorder: 'rgba(255, 255, 255, 0.92)',
+      lipShadow: '0 14px 30px -4px rgba(0, 0, 0, 0.20), inset 0 1px 2px rgba(255, 255, 255, 0.95)',
+      woodTone: 'linear-gradient(90deg, #334155 0%, #475569 50%, #334155 100%)',
     },
   }[shelfColor];
 
-  // Estilos adaptados ao tema ativo
+  // Estilos adaptados ao tema ativo para textos e elementos estruturais
   const themeContainerStyles = {
     light: {
-      shelfFloor: 'bg-gradient-to-b from-[#F8FAFC]/90 to-[#EDF2F7]/95 border-slate-200/90 shadow-[inset_0_2px_4px_rgba(0,0,0,0.03)]',
       titleColor: 'text-[#0F172A]',
       countColor: 'text-[#64748B]',
-      dotColor: 'bg-slate-900',
     },
     dark: {
-      shelfFloor: 'bg-gradient-to-b from-[#1E293B]/80 to-[#0F172A]/90 border-slate-700/80 shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]',
       titleColor: 'text-white',
       countColor: 'text-slate-400',
-      dotColor: 'bg-amber-400',
     },
     amber: {
-      shelfFloor: 'bg-gradient-to-b from-[#FAF1DC]/90 to-[#EAD8B5]/90 border-[#D8C29D] shadow-[inset_0_2px_4px_rgba(154,91,50,0.04)]',
       titleColor: 'text-[#3E2B18]',
       countColor: 'text-[#8C4A19]',
-      dotColor: 'bg-[#8C4A19]',
     },
   }[themeMode];
 
@@ -99,7 +153,10 @@ export const AcrylicShelf: React.FC<AcrylicShelfProps> = ({
       {/* 1. CABEÇALHO DA CATEGORIA */}
       <div className="flex items-center justify-between px-1.5 pb-1">
         <div className="flex items-center gap-2">
-          <span className={`w-1.5 h-3.5 rounded-full ${themeContainerStyles.dotColor}`} />
+          <span
+            className="w-1.5 h-3.5 rounded-full shadow-xs"
+            style={{ backgroundColor: shelfThemeConfig.dot }}
+          />
           <h3 className={`font-sans text-sm sm:text-base font-bold tracking-tight ${themeContainerStyles.titleColor}`}>
             {categoryTitle}
           </h3>
@@ -131,8 +188,15 @@ export const AcrylicShelf: React.FC<AcrylicShelfProps> = ({
         </div>
       </div>
 
-      {/* 2. ESTRUTURA TÁTIL DA ESTANTE */}
-      <div className={`relative pt-3 pb-2 overflow-hidden rounded-2xl border ${themeContainerStyles.shelfFloor}`}>
+      {/* 2. ESTRUTURA TÁTIL DA ESTANTE COM COR TRANSLÚCIDA GARANTIDA */}
+      <div
+        className="relative pt-3 pb-2 overflow-hidden rounded-2xl border transition-all duration-300"
+        style={{
+          background: shelfThemeConfig.floorBg,
+          borderColor: shelfThemeConfig.floorBorder,
+          boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.04)',
+        }}
+      >
         {/* Carrossel de Livros */}
         <div
           ref={scrollContainerRef}
@@ -157,28 +221,39 @@ export const AcrylicShelf: React.FC<AcrylicShelfProps> = ({
         {/* SOMBRA INTERNA PROJETADA NA PARTE INFERIOR DOS LIVROS */}
         <div className="absolute bottom-3 left-0 right-0 h-14 bg-gradient-to-t from-black/25 via-black/10 to-transparent pointer-events-none z-15" />
 
-        {/* BORDA DE VIDRO / ACRÍLICO FOSCO ELEGANTE */}
+        {/* BORDA DE VIDRO / ACRÍLICO TRANSLÚCIDO COLORIDO ELEGANTE */}
         <div
-          className={`absolute bottom-0 left-0 right-0 h-13 sm:h-14 rounded-2xl backdrop-blur-md ${shelfStyles.lipBg} ${shelfStyles.lipShadow} pointer-events-none z-20 flex items-center justify-between px-3.5`}
+          className="absolute bottom-0 left-0 right-0 h-13 sm:h-14 rounded-2xl backdrop-blur-md pointer-events-none z-20 flex items-center justify-between px-3.5 transition-all duration-300"
           style={{
-            borderTop: '1px solid rgba(255, 255, 255, 0.25)',
-            borderLeft: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRight: '1px solid rgba(255, 255, 255, 0.15)',
-            borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+            background: shelfThemeConfig.lipBg,
+            borderColor: shelfThemeConfig.lipBorder,
+            boxShadow: shelfThemeConfig.lipShadow,
+            borderTop: '1px solid rgba(255, 255, 255, 0.45)',
+            borderLeft: `1px solid ${shelfThemeConfig.lipBorder}`,
+            borderRight: `1px solid ${shelfThemeConfig.lipBorder}`,
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
           }}
         >
           {/* Parafuso Metálico Esquerdo */}
           <div className="acrylic-screw" title="Fixador Metálico de Acrílico" />
 
           {/* Borda superior de 1px com brilho de reflexo em gradiente */}
-          <div className={`absolute top-0 left-4 right-4 h-[1px] ${shelfStyles.highlight}`} />
+          <div
+            className="absolute top-0 left-4 right-4 h-[1px]"
+            style={{
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.75) 50%, transparent 100%)',
+            }}
+          />
 
           {/* Parafuso Metálico Direito */}
           <div className="acrylic-screw" title="Fixador Metálico de Acrílico" />
         </div>
 
         {/* Base / Friso de Madeira Nobre sob o vidro para ancoragem física */}
-        <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${shelfStyles.woodTone} opacity-70 pointer-events-none z-25 rounded-b-2xl`} />
+        <div
+          className="absolute bottom-0 left-0 right-0 h-1.5 opacity-80 pointer-events-none z-25 rounded-b-2xl"
+          style={{ background: shelfThemeConfig.woodTone }}
+        />
       </div>
     </div>
   );

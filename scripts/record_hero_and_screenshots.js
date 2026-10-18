@@ -11,7 +11,8 @@ async function main() {
 
   const context = await browser.newContext({
     viewport: { width: 1280, height: 800 },
-    deviceScaleFactor: 1
+    deviceScaleFactor: 1,
+    serviceWorkers: 'block',
   });
 
   const page = await context.newPage();
@@ -20,7 +21,7 @@ async function main() {
   await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(1500);
 
   fs.mkdirSync('docs/images', { recursive: true });
   fs.mkdirSync('public/docs/images', { recursive: true });

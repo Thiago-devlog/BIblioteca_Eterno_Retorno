@@ -31,6 +31,16 @@ export const AcrylicBookCard: React.FC<AcrylicBookCardProps> = ({
     setMousePos({ x, y });
   };
 
+  const coverBg = book.coverBg || '#FAF6ED';
+  const coverBorder = book.coverBorder || '#D8CEB7';
+  const coverAccent = book.coverAccent || '#8C2D19';
+  const isLightCover =
+    coverBg === '#FAF6ED' ||
+    coverBg === '#EFE7D8' ||
+    coverBg === '#ECE3D0' ||
+    coverBg.toLowerCase().startsWith('#f') ||
+    coverBg.toLowerCase().startsWith('#e');
+
   return (
     <motion.div
       whileHover={{ y: -6, scale: 1.03 }}
@@ -47,13 +57,16 @@ export const AcrylicBookCard: React.FC<AcrylicBookCardProps> = ({
       style={{ width: '112px' }}
       title={`${book.title} (${book.year}) — Obra Completa · Tempo estimado: ${readingTimeFormatted}`}
     >
-      {/* Visual Book Cover — sem animação de salto; agora com reflexo de luz e acabamento físico */}
+      {/* Visual Book Cover — com acabamento físico editorial de capa e lombada 3D */}
       <div
         className="relative w-full aspect-[1/1.42] rounded-md overflow-hidden shadow-[0_6px_14px_rgba(0,0,0,0.18)] flex flex-col justify-between p-2.5 transition-shadow duration-300 group-hover:shadow-[0_10px_22px_rgba(0,0,0,0.28)] border"
         style={{
-          backgroundColor: book.coverBg,
-          borderColor: book.coverBorder,
-          color: book.coverAccent,
+          backgroundColor: coverBg,
+          borderColor: coverBorder,
+          color: isLightCover ? '#1A1412' : coverAccent,
+          backgroundImage: isLightCover
+            ? 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(230,220,200,0.15) 100%)'
+            : 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.22) 100%)',
         }}
       >
         {/* Lombada 3D sutil à esquerda */}
@@ -104,7 +117,7 @@ export const AcrylicBookCard: React.FC<AcrylicBookCardProps> = ({
         </div>
 
         {/* Rodapé da Capa: Obra Completa & Tempo Estimado de Leitura */}
-        <div className="text-center z-10 border-t pt-1 space-y-0.5" style={{ borderColor: `${book.coverAccent}25` }}>
+        <div className="text-center z-10 border-t pt-1 space-y-0.5" style={{ borderColor: `${coverAccent}33` }}>
           <div className="flex items-center justify-center gap-1 text-[6.5px] font-mono font-bold uppercase tracking-wider opacity-90 truncate">
             <span className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
             <span>{isCompleted ? 'CONCLUÍDO' : 'OBRA COMPLETA'}</span>

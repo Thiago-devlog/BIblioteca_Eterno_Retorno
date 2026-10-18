@@ -112,9 +112,16 @@ export const BookEditorialModal: React.FC<BookEditorialModalProps> = ({
               transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut' }}
               className="book-spine-shadow w-28 h-40 sm:w-32 sm:h-46 rounded-lg p-3 flex flex-col justify-between border text-center shadow-xl relative z-10"
               style={{
-                backgroundColor: book.coverBg,
-                borderColor: book.coverBorder,
-                color: book.coverAccent,
+                backgroundColor: book.coverBg || '#FAF6ED',
+                borderColor: book.coverBorder || '#D8CEB7',
+                color:
+                  book.coverBg === '#FAF6ED' || book.coverBg === '#EFE7D8' || book.coverBg === '#ECE3D0'
+                    ? '#1A1412'
+                    : book.coverAccent || '#F3D27E',
+                backgroundImage:
+                  book.coverBg === '#FAF6ED' || book.coverBg === '#EFE7D8' || book.coverBg === '#ECE3D0'
+                    ? 'linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(230,220,200,0.15) 100%)'
+                    : 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.22) 100%)',
               }}
             >
               <span className="text-[9px] font-mono font-bold tracking-wider opacity-85">
