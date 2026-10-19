@@ -1,4 +1,3 @@
-import { jsPDF } from 'jspdf';
 import { BookItem, ChapterData } from '../data/catalog';
 import { loadEpubChapters } from './epubLoader';
 
@@ -37,6 +36,9 @@ export async function generateAndDownloadBookPdf(
     }
 
     onProgress?.({ status: 'formatting', message: 'Diagramando páginas e folha de rosto...' });
+
+    // Carregamento dinâmico do jsPDF sob demanda para não pesar o bundle inicial
+    const { jsPDF } = await import('jspdf');
 
     // Configuração da página A4 em milímetros
     const doc = new jsPDF({

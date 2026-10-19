@@ -3,13 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { AUTHORS_DATABASE, BOOKS_DATABASE, BookItem } from './data/booksData';
 import { AcrylicLibraryView } from './components/Showcase/AcrylicLibraryView';
-import { MinimalistReader } from './components/Reader/MinimalistReader';
-import { AuthorDossierModal } from './components/Showcase/AuthorDossierModal';
-import { BookEditorialModal } from './components/Modal/BookEditorialModal';
+import {
+  ReadingHistoryDrawer,
+  ReadingHistoryFloatingButton,
+  ReadingProgressRecord,
+} from './components/Showcase/ReadingHistoryDrawer';
 import { AnimatePresence } from 'motion/react';
+
+// Code-splitting preguiçoso (Lazy Loading) para componentes pesados
+const MinimalistReader = React.lazy(() =>
+  import('./components/Reader/MinimalistReader').then((m) => ({ default: m.MinimalistReader }))
+);
+const BookEditorialModal = React.lazy(() =>
+  import('./components/Modal/BookEditorialModal').then((m) => ({ default: m.BookEditorialModal }))
+);
+const AuthorDossierModal = React.lazy(() =>
+  import('./components/Showcase/AuthorDossierModal').then((m) => ({ default: m.AuthorDossierModal }))
+);
 
 export default function App() {
   // Modo de Tema Visual: 'light' (Claro) | 'dark' (Escuro) | 'amber' (Amarelado sem Luz Azul)
@@ -33,6 +46,9 @@ export default function App() {
   // Modal de Dossiês dos Autores
   const [isDossiersOpen, setIsDossiersOpen] = useState<boolean>(false);
 
+  // Painel / Gaveta Lateral de Histórico e Retomada de Leitura
+  const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState<boolean>(false);
+
   // Sistema de Favoritos Persistente
   const [favorites, setFavorites] = useState<string[]>(() => {
     const saved = localStorage.getItem('eterno_favorites_acrylic');
@@ -50,36 +66,41 @@ export default function App() {
     localStorage.setItem('eterno_favorites_acrylic', JSON.stringify(favorites));
   }, [favorites]);
 
-  // Progresso de Leitura Persistente
+  // Progresso de Leitura Persistente com Histórico Completo
   const [readingProgress, setReadingProgress] = useState<
-    Record<string, { progressPercent: number; chapterIndex?: number; lastLocation?: string }>
+    Record<string, ReadingProgressRecord>
   >(() => {
     const saved = localStorage.getItem('eterno_reading_progress_acrylic');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Corrige marcações legadas que gravavam a rolagem da página isolada como se fosse do livro todo
-        if (parsed['quincas-borba'] && parsed['quincas-borba'].chapterIndex === 0 && parsed['quincas-borba'].progressPercent > 20) {
-          parsed['quincas-borba'].progressPercent = 1;
-        }
-        if (parsed['memorias-postumas'] && parsed['memorias-postumas'].chapterIndex <= 1 && parsed['memorias-postumas'].progressPercent > 20) {
-          parsed['memorias-postumas'].progressPercent = 2;
-        }
         return parsed;
       } catch (e) {
         // fallback
       }
     }
+    const now = Date.now();
     return {
       'quincas-borba': {
-        progressPercent: 1,
+        progressPercent: 97,
         chapterIndex: 0,
-        lastLocation: 'Capítulo I',
+        lastLocation: 'Capítulo I: Há dor e dor',
+        lastReadTimestamp: now - 1000 * 60 * 35,
+        isCompleted: false,
       },
       'memorias-postumas': {
-        progressPercent: 2,
-        chapterIndex: 1,
-        lastLocation: 'Capítulo II',
+        progressPercent: 35,
+        chapterIndex: 3,
+        lastLocation: 'Capítulo IV: O Fixismo',
+        lastReadTimestamp: now - 1000 * 60 * 60 * 18,
+        isCompleted: false,
+      },
+      'dom-casmurro': {
+        progressPercent: 100,
+        chapterIndex: 10,
+        lastLocation: 'Obra Concluída',
+        lastReadTimestamp: now - 1000 * 60 * 60 * 48,
+        isCompleted: true,
       },
     };
   });
@@ -88,16 +109,48 @@ export default function App() {
     localStorage.setItem('eterno_reading_progress_acrylic', JSON.stringify(readingProgress));
   }, [readingProgress]);
 
+  // Atalho de Teclado Global: tecla 'H' para abrir/fechar Histórico de Leitura
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement;
+      const tagName = activeEl?.tagName;
+      if (
+        tagName === 'INPUT' ||
+        tagName === 'TEXTAREA' ||
+        (activeEl as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+      if ((e.key === 'h' || e.key === 'H') && !activeReaderBook) {
+        e.preventDefault();
+        setIsHistoryDrawerOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeReaderBook]);
+
+  // Quantidade de leituras ativas em andamento (< 100%)
+  const activeReadingCount = useMemo(() => {
+    return Object.values(readingProgress).filter(
+      (p) => (p.progressPercent || 0) > 0 && !p.isCompleted && (p.progressPercent || 0) < 100
+    ).length;
+  }, [readingProgress]);
+
   // Ao clicar em um livro na estante: exibe o Modal Editorial da Obra
   const handleInspectBook = (book: BookItem) => {
     setSelectedBookForModal(book);
   };
 
   // Abertura direta do Leitor Imersivo em tela dedicada para leitura integral completa
-  const handleOpenReaderDirectly = (book: BookItem) => {
+  const handleOpenReaderDirectly = (book: BookItem, chapterIndex?: number) => {
     setSelectedBookForModal(null);
+    setIsHistoryDrawerOpen(false);
     setActiveReaderBook(book);
-    const savedChapter = readingProgress[book.id]?.chapterIndex || 0;
+    const savedChapter =
+      typeof chapterIndex === 'number'
+        ? chapterIndex
+        : readingProgress[book.id]?.chapterIndex || 0;
     setActiveChapterIndex(savedChapter);
   };
 
@@ -106,20 +159,36 @@ export default function App() {
     handleOpenReaderDirectly(book);
   };
 
-  // Do Modal Editorial: Alternar status "Marcar como Lido" (100% ou reset)
+  // Do Modal Editorial / Histórico: Alternar status "Marcar como Lido" (100% ou reset)
   const handleToggleMarkAsRead = (bookId: string) => {
     setReadingProgress((prev) => {
       const currentProg = prev[bookId]?.progressPercent || 0;
-      const isAlreadyCompleted = currentProg >= 100;
+      const isAlreadyCompleted = currentProg >= 100 || prev[bookId]?.isCompleted;
       return {
         ...prev,
         [bookId]: {
-          chapterIndex: 0,
+          chapterIndex: isAlreadyCompleted ? 0 : (prev[bookId]?.chapterIndex || 0),
           progressPercent: isAlreadyCompleted ? 0 : 100,
           lastLocation: isAlreadyCompleted ? 'Não iniciado' : 'Obra Concluída',
+          lastReadTimestamp: Date.now(),
+          isCompleted: !isAlreadyCompleted,
         },
       };
     });
+  };
+
+  // Remover livro específico do histórico de leitura
+  const handleRemoveFromHistory = (bookId: string) => {
+    setReadingProgress((prev) => {
+      const next = { ...prev };
+      delete next[bookId];
+      return next;
+    });
+  };
+
+  // Limpar todo o histórico de leitura
+  const handleClearAllHistory = () => {
+    setReadingProgress({});
   };
 
   // Do Modal Editorial: Alternar Favorito
@@ -145,6 +214,8 @@ export default function App() {
         chapterIndex,
         progressPercent,
         lastLocation: locationText,
+        lastReadTimestamp: Date.now(),
+        isCompleted: progressPercent >= 100,
       },
     }));
   };
@@ -169,52 +240,82 @@ export default function App() {
         onOpenBook={handleInspectBook}
         onOpenReaderDirectly={handleOpenReaderDirectly}
         onOpenDossiers={() => setIsDossiersOpen(true)}
+        onOpenHistory={() => setIsHistoryDrawerOpen(true)}
       />
 
       {/* 2. MODAL EDITORIAL DA OBRA COM TRANSIÇÃO EM MOLA (Apresentação antes do leitor) */}
       <AnimatePresence>
         {selectedBookForModal && (
-          <BookEditorialModal
-            book={selectedBookForModal}
-            isOpen={true}
-            progressPercent={readingProgress[selectedBookForModal.id]?.progressPercent || 0}
-            isFavorite={favorites.includes(selectedBookForModal.id)}
-            onClose={() => setSelectedBookForModal(null)}
-            onStartReading={handleStartReadingFromModal}
-            onToggleMarkAsRead={handleToggleMarkAsRead}
-            onToggleFavorite={handleToggleFavorite}
-          />
+          <Suspense fallback={null}>
+            <BookEditorialModal
+              book={selectedBookForModal}
+              isOpen={true}
+              progressPercent={readingProgress[selectedBookForModal.id]?.progressPercent || 0}
+              isFavorite={favorites.includes(selectedBookForModal.id)}
+              onClose={() => setSelectedBookForModal(null)}
+              onStartReading={handleStartReadingFromModal}
+              onToggleMarkAsRead={handleToggleMarkAsRead}
+              onToggleFavorite={handleToggleFavorite}
+            />
+          </Suspense>
         )}
       </AnimatePresence>
 
       {/* 3. LEITOR EDITORIAL MINIMALISTA (Grifos inline, notas, modo amarelado/escuro, dicionário) */}
       <AnimatePresence>
         {activeReaderBook && (
-          <MinimalistReader
-            book={activeReaderBook}
-            initialChapterIndex={activeChapterIndex}
-            initialProgressPercent={readingProgress[activeReaderBook.id]?.progressPercent || 0}
-            themeMode={themeMode}
-            onToggleTheme={setThemeMode}
-            onClose={handleCloseReader}
-            onUpdateProgress={handleUpdateProgress}
-          />
+          <Suspense fallback={null}>
+            <MinimalistReader
+              book={activeReaderBook}
+              initialChapterIndex={activeChapterIndex}
+              initialProgressPercent={readingProgress[activeReaderBook.id]?.progressPercent || 0}
+              themeMode={themeMode}
+              onToggleTheme={setThemeMode}
+              onClose={handleCloseReader}
+              onUpdateProgress={handleUpdateProgress}
+            />
+          </Suspense>
         )}
       </AnimatePresence>
 
       {/* 4. MODAL DE DOSSIÊS DE ESCRITORES (Acervo canônico) */}
       <AnimatePresence>
         {isDossiersOpen && (
-          <AuthorDossierModal
-            authors={AUTHORS_DATABASE}
-            books={BOOKS_DATABASE}
-            isOpen={true}
-            onClose={() => setIsDossiersOpen(false)}
-            onOpenBook={handleOpenReaderDirectly}
-            themeMode={themeMode}
-          />
+          <Suspense fallback={null}>
+            <AuthorDossierModal
+              authors={AUTHORS_DATABASE}
+              books={BOOKS_DATABASE}
+              isOpen={true}
+              onClose={() => setIsDossiersOpen(false)}
+              onOpenBook={handleOpenReaderDirectly}
+              themeMode={themeMode}
+            />
+          </Suspense>
         )}
       </AnimatePresence>
+
+      {/* 5. GAVETA LATERAL RETRÁTIL DE HISTÓRICO & RETOMADA (Slide-Over Drawer) */}
+      <ReadingHistoryDrawer
+        isOpen={isHistoryDrawerOpen}
+        onClose={() => setIsHistoryDrawerOpen(false)}
+        books={BOOKS_DATABASE}
+        readingProgress={readingProgress}
+        themeMode={themeMode}
+        onResumeBook={handleOpenReaderDirectly}
+        onInspectBook={handleInspectBook}
+        onToggleMarkAsRead={handleToggleMarkAsRead}
+        onRemoveFromHistory={handleRemoveFromHistory}
+        onClearAllHistory={handleClearAllHistory}
+      />
+
+      {/* 6. BOTÃO FLUTUANTE ELEGANTE DE HISTÓRICO (Fixo no canto inferior direito) */}
+      {!activeReaderBook && (
+        <ReadingHistoryFloatingButton
+          onClick={() => setIsHistoryDrawerOpen((prev) => !prev)}
+          activeCount={activeReadingCount}
+          themeMode={themeMode}
+        />
+      )}
     </div>
   );
 }

@@ -8,7 +8,6 @@
  * quanto para ePubs de documento único com divisores canônicos.
  */
 
-import JSZip from 'jszip';
 import { ChapterData } from '../data/catalog';
 
 // Cache em memória dos livros ePub processados para carregamento instantâneo
@@ -135,6 +134,7 @@ export async function loadEpubChapters(epubUrl: string): Promise<ChapterData[]> 
     }
 
     const arrayBuffer = await response.arrayBuffer();
+    const JSZip = (await import('jszip')).default;
     const zip = await JSZip.loadAsync(arrayBuffer);
 
     // 1. Localiza o arquivo container.xml

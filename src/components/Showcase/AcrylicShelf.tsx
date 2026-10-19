@@ -13,7 +13,7 @@ interface AcrylicShelfProps {
   onSelectBookToInspect: (book: BookItem) => void;
 }
 
-export const AcrylicShelf: React.FC<AcrylicShelfProps> = ({
+export const AcrylicShelf: React.FC<AcrylicShelfProps> = React.memo(({
   categoryTitle,
   books,
   shelfColor,
@@ -149,7 +149,13 @@ export const AcrylicShelf: React.FC<AcrylicShelfProps> = ({
   }[themeMode];
 
   return (
-    <div className="space-y-2 pt-2">
+    <div
+      className="space-y-2 pt-2"
+      style={{
+        contentVisibility: 'auto',
+        containIntrinsicSize: '1px 320px',
+      }}
+    >
       {/* 1. CABEÇALHO DA CATEGORIA */}
       <div className="flex items-center justify-between px-1.5 pb-1">
         <div className="flex items-center gap-2">
@@ -201,7 +207,12 @@ export const AcrylicShelf: React.FC<AcrylicShelfProps> = ({
         <div
           ref={scrollContainerRef}
           className="flex items-end gap-3.5 overflow-x-auto pb-8 pt-2 px-3.5 scrollbar-none relative z-10"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehaviorX: 'contain',
+          }}
         >
           {books.map((book) => {
             const prog = readingProgress[book.id]?.progressPercent || 0;
@@ -257,4 +268,5 @@ export const AcrylicShelf: React.FC<AcrylicShelfProps> = ({
       </div>
     </div>
   );
-};
+});
+AcrylicShelf.displayName = 'AcrylicShelf';

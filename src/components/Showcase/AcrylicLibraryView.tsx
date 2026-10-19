@@ -4,18 +4,19 @@ import { AcrylicShelf } from './AcrylicShelf';
 import { RenaissanceParallaxHero } from './RenaissanceParallaxHero';
 import { FolderDrawer } from '../FolderDrawer';
 import { OfflineIndicator } from '../PWA/OfflineIndicator';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, BookMarked } from 'lucide-react';
 
 interface AcrylicLibraryViewProps {
   books: BookItem[];
   authors: AuthorProfile[];
-  readingProgress: Record<string, { progressPercent: number }>;
+  readingProgress: Record<string, { progressPercent: number; chapterIndex?: number; lastReadTimestamp?: number }>;
   favorites: string[];
   themeMode: 'light' | 'dark' | 'amber';
   onToggleTheme: (mode: 'light' | 'dark' | 'amber') => void;
   onOpenBook: (book: BookItem) => void;
-  onOpenReaderDirectly?: (book: BookItem) => void;
+  onOpenReaderDirectly?: (book: BookItem, chapterIndex?: number) => void;
   onOpenDossiers: () => void;
+  onOpenHistory?: () => void;
 }
 
 export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
@@ -28,6 +29,7 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
   onOpenBook,
   onOpenReaderDirectly,
   onOpenDossiers,
+  onOpenHistory,
 }) => {
   const ecaBooks = books.filter((b) => b.authorId === 'eca-de-queiros');
   const tolstoiBooks = books.filter((b) => b.authorId === 'tolstoi');
@@ -42,9 +44,18 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
   );
   const modernismBooks = books.filter((b) => b.authorId === 'lima-barreto');
 
-  // Livro em leitura ativa para o botão inferior
-  const activeReadingBook = books.find((b) => b.id === 'quincas-borba') || books[0];
-  const activePercent = readingProgress[activeReadingBook.id]?.progressPercent || 97;
+  // Encontra o livro mais recentemente lido com progresso ativo (< 100%)
+  const inProgressList = Object.entries(readingProgress)
+    .filter(([_, data]) => (data.progressPercent || 0) > 0 && (data.progressPercent || 0) < 100)
+    .sort((a, b) => (b[1].lastReadTimestamp || 0) - (a[1].lastReadTimestamp || 0));
+
+  const mostRecentId = inProgressList[0]?.[0];
+  const activeReadingBook =
+    (mostRecentId && books.find((b) => b.id === mostRecentId)) ||
+    books.find((b) => b.id === 'quincas-borba') ||
+    books[0];
+  const activePercent = readingProgress[activeReadingBook.id]?.progressPercent || 0;
+  const activeChapter = readingProgress[activeReadingBook.id]?.chapterIndex || 0;
 
   // Estilos da casca principal adaptados ao tema ativo
   const themePageStyles = {
@@ -91,6 +102,7 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
           themeMode={themeMode}
           onToggleTheme={onToggleTheme}
           onOpenDossiers={onOpenDossiers}
+          onOpenHistory={onOpenHistory}
           onScrollToShelves={() => {
             document.getElementById('prateleiras')?.scrollIntoView({ behavior: 'smooth' });
           }}
@@ -198,15 +210,33 @@ export const AcrylicLibraryView: React.FC<AcrylicLibraryViewProps> = ({
           </div>
         </div>
 
-        {/* 4. BOTÃO FLUTUANTE INFERIOR: Abertura Editorial da Obra em Leitura */}
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none z-30 px-4">
-          <button
-            onClick={() => (onOpenReaderDirectly ? onOpenReaderDirectly(activeReadingBook) : onOpenBook(activeReadingBook))}
-            className={`pointer-events-auto active:scale-98 transition-all px-7 py-3.5 rounded-full flex items-center gap-2.5 text-xs font-sans font-bold cursor-pointer ${themePageStyles.bottomBtn}`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Continuar: {activeReadingBook.title} ({activePercent}%)</span>
-          </button>
+        {/* 4. BOTÃO FLUTUANTE INFERIOR: Abertura Editorial da Obra em Leitura & Atalho de Histórico */}
+        <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center pointer-events-none z-30 px-4 gap-2.5">
+          {activePercent > 0 && (
+            <button
+              onClick={() =>
+                onOpenReaderDirectly
+                  ? onOpenReaderDirectly(activeReadingBook, activeChapter)
+                  : onOpenBook(activeReadingBook)
+              }
+              className={`pointer-events-auto active:scale-98 transition-all px-6 py-3.5 rounded-full flex items-center gap-2.5 text-xs font-sans font-bold cursor-pointer ${themePageStyles.bottomBtn}`}
+              title={`Continuar leitura de ${activeReadingBook.title} (${activePercent}% lido)`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Continuar: {activeReadingBook.title} ({activePercent}%)</span>
+            </button>
+          )}
+
+          {onOpenHistory && (
+            <button
+              onClick={onOpenHistory}
+              className={`pointer-events-auto active:scale-98 transition-all px-4 py-3.5 rounded-full flex items-center gap-2 text-xs font-sans font-semibold cursor-pointer border shadow-lg ${themePageStyles.dossierBtn}`}
+              title="Abrir painel completo de histórico e retomada (Atalho: H)"
+            >
+              <BookMarked className="w-4 h-4 text-amber-500" />
+              <span className="hidden sm:inline">Histórico</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

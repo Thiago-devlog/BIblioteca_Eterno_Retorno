@@ -11,7 +11,7 @@ interface AcrylicBookCardProps {
   isFavorite?: boolean;
 }
 
-export const AcrylicBookCard: React.FC<AcrylicBookCardProps> = ({
+export const AcrylicBookCard: React.FC<AcrylicBookCardProps> = React.memo(({
   book,
   onOpenBook,
   progressPercent = 0,
@@ -143,4 +143,5 @@ export const AcrylicBookCard: React.FC<AcrylicBookCardProps> = ({
       <div className="w-4/5 h-2 mx-auto bg-black/20 blur-xs rounded-full -mt-1" />
     </motion.div>
   );
-};
+});
+AcrylicBookCard.displayName = 'AcrylicBookCard';

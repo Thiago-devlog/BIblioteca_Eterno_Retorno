@@ -47,6 +47,16 @@ export interface ReadingProgressRecord {
   lastReadDate: string;
 }
 
+export interface ReadingHistoryEntry {
+  bookId: string;
+  chapterIndex: number;
+  chapterTitle?: string;
+  progressPercent: number;
+  lastReadTimestamp: number;
+  lastReadFormatted?: string;
+  isCompleted?: boolean;
+}
+
 export type ViewMode = 'folders' | 'bookshelf' | 'catalog' | 'progress';
 
 export interface ReaderSettings {

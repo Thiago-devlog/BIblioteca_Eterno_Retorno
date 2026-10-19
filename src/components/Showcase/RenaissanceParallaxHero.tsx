@@ -1,12 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
-import { FolderArchive, Sun, Moon, Flame, ChevronDown, Compass } from 'lucide-react';
+import { FolderArchive, Sun, Moon, Flame, ChevronDown, Compass, BookMarked } from 'lucide-react';
 import { PWAInstallButton } from '../PWA/OfflineIndicator';
 
 interface RenaissanceParallaxHeroProps {
   themeMode: 'light' | 'dark' | 'amber';
   onToggleTheme: (mode: 'light' | 'dark' | 'amber') => void;
   onOpenDossiers: () => void;
+  onOpenHistory?: () => void;
   onScrollToShelves?: () => void;
 }
 
@@ -14,6 +15,7 @@ export const RenaissanceParallaxHero: React.FC<RenaissanceParallaxHeroProps> = (
   themeMode,
   onToggleTheme,
   onOpenDossiers,
+  onOpenHistory,
   onScrollToShelves,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -226,6 +228,18 @@ export const RenaissanceParallaxHero: React.FC<RenaissanceParallaxHeroProps> = (
               <FolderArchive className="w-3.5 h-3.5 text-amber-400" />
               <span className="text-[11px] font-sans hidden sm:inline">Dossiês</span>
             </button>
+
+            {/* Histórico & Retomada de Leitura */}
+            {onOpenHistory && (
+              <button
+                onClick={onOpenHistory}
+                className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-amber-200 hover:text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+                title="Histórico e retomada de leitura (Atalho: H)"
+              >
+                <BookMarked className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[11px] font-sans hidden sm:inline">Histórico</span>
+              </button>
+            )}
 
             <PWAInstallButton />
           </div>
